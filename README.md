@@ -1,0 +1,1 @@
+# S6-ZMP-System-indentyfikacji-flory-Desktop
