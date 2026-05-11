@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using VirtualHerbarium.AdminPanel.Views;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
@@ -19,7 +13,6 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         public MainViewModel()
         {
-           
             CurrentView = new PlaceholderViewModel("Wybierz opcję z menu");
         }
 
@@ -31,11 +24,11 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             switch (value)
             {
                 case "Users":
-                    CurrentView = new PlaceholderViewModel("Widok użytkowników");
+                    CurrentView = new UsersView(); 
                     break;
 
                 case "Plants":
-                    CurrentView = new PlaceholderViewModel("Widok roślin");
+                    CurrentView = new PlantsView();
                     break;
 
                 case "Collections":

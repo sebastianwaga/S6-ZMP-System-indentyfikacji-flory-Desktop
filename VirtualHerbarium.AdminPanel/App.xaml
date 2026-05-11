@@ -1,21 +1,24 @@
 ﻿<Application x:Class="VirtualHerbarium.AdminPanel.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             StartupUri="Views/MainWindow.xaml">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
     <Application.Resources>
         <ResourceDictionary>
+
             <ResourceDictionary.MergedDictionaries>
 
-               
                 <materialDesign:BundledTheme BaseTheme="Light"
                                              PrimaryColor="Green"
                                              SecondaryColor="Lime" />
 
-           
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
 
             </ResourceDictionary.MergedDictionaries>
+
+            <Color x:Key="AccentGreen">#FF4CAF50</Color>
+            <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource AccentGreen}" />
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

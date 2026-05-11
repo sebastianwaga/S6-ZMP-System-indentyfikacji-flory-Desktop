@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="VirtualHerbarium.AdminPanel.Views.UsersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="8 4"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="MinWidth" Value="90"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+
+        <Border Background="White"
+                CornerRadius="12"
+                Padding="16"
+                SnapsToDevicePixels="True"
+                Effect="{DynamicResource MaterialDesignElevation3}">
+
+            <DataGrid ItemsSource="{Binding Users}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      Margin="0"
+                      RowHeight="40"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="None">
+
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#FF388E3C"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Padding" Value="8"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Email" Binding="{Binding email}" Width="*" />
+                    <DataGridTextColumn Header="Username" Binding="{Binding username}" Width="*" />
+                    <DataGridCheckBoxColumn Header="Active" Binding="{Binding active}" Width="100" />
+                    <DataGridCheckBoxColumn Header="Verified" Binding="{Binding verified}" Width="100" />
+                    <DataGridCheckBoxColumn Header="Admin" Binding="{Binding admin}" Width="100" />
+
+                    <DataGridTemplateColumn Header="Akcje" Width="450">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+
+                                    <Button Content="Ban"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#D32F2F"
+                                            Command="{Binding DataContext.BanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                    <Button Content="Unban"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#4CAF50"
+                                            Command="{Binding DataContext.UnbanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                    <Button Content="Make Admin"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#1976D2"
+                                            Command="{Binding DataContext.MakeAdminCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                    <Button Content="Remove Admin"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#757575"
+                                            Command="{Binding DataContext.RemoveAdminCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                    <Button Content="Warning"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#FFA000"
+                                            Command="{Binding DataContext.WarningCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

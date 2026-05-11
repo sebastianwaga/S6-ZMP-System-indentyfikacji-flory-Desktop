@@ -10,7 +10,7 @@
         Title="Virtual Herbarium – Panel administratora"
         Height="600" Width="1100"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="{StaticResource AccentGreenBrush}">
 
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
@@ -28,7 +28,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        
         <DockPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
                    Background="{DynamicResource PrimaryHueMidBrush}"
                    LastChildFill="True">
@@ -39,14 +38,13 @@
                        Margin="16,0" />
         </DockPanel>
 
-        
         <StackPanel Grid.Column="0" Grid.Row="1"
-                    Background="{DynamicResource MaterialDesignPaper}">
+                    Background="White">
             <TextBlock Text="Nawigacja"
                        Margin="16,16,16,8"
                        FontWeight="Bold"
                        FontSize="14" />
-            
+
             <ListBox SelectedValuePath="Tag"
                      SelectedValue="{Binding SelectedMenu}">
                 <ListBoxItem Content="Użytkownicy" Tag="Users" />
@@ -55,13 +53,9 @@
                 <ListBoxItem Content="Powiadomienia" Tag="Notifications" />
                 <ListBoxItem Content="Statystyki" Tag="Stats" />
             </ListBox>
-
         </StackPanel>
 
-
         <ContentControl Grid.Column="1" Grid.Row="1"
-                Content="{Binding CurrentView}">
-        </ContentControl>
-
+                        Content="{Binding CurrentView}" />
     </Grid>
 </Window>
