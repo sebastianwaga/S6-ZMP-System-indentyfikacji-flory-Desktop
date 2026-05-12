@@ -31,7 +31,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             if (!result.Success || result.Data == null)
             {
-                ShowError(result.Error ?? "Nie udało się pobrać listy roślin.");
+                ShowError(AppResources.Error_FetchPlants);
                 return;
             }
 
@@ -42,10 +42,11 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         private async Task DeletePlant(PlantResponse plant)
         {
             var confirm = MessageBox.Show(
-                $"Czy na pewno chcesz usunąć roślinę: {plant.name}?",
-                "Potwierdzenie",
+                string.Format(AppResources.Confirm_DeletePlant, plant.name),
+                AppResources.Confirm_Title,
                 MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+                MessageBoxImage.Warning
+            );
 
             if (confirm != MessageBoxResult.Yes)
                 return;
@@ -54,7 +55,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             if (!result.Success)
             {
-                ShowError(result.Error ?? "Nie udało się usunąć rośliny.");
+                ShowError(AppResources.Error_DeletePlant);
                 return;
             }
 
@@ -63,7 +64,12 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         private void ShowError(string message)
         {
-            MessageBox.Show(message, "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(
+                message,
+                AppResources.Error_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

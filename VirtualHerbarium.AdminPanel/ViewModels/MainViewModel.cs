@@ -1,4 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using VirtualHerbarium.AdminPanel.Helpers;
 using VirtualHerbarium.AdminPanel.Views;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
@@ -11,20 +14,30 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         [ObservableProperty]
         private string? selectedMenu;
 
+        public ICommand ChangeLanguageCommand { get; }
+
         public MainViewModel()
         {
-            CurrentView = new PlaceholderViewModel("Wybierz opcję z menu");
+            ChangeLanguageCommand = new RelayCommand<string>(ChangeLanguage);
+
+            CurrentView = new PlaceholderViewModel(AppResources.Placeholder_SelectOption);
         }
 
-        partial void OnSelectedMenuChanged(string? value)
+        private Task ChangeLanguage(string lang)
         {
-            if (value == null)
-                return;
+            LanguageManager.SetLanguage(lang);
 
-            switch (value)
+            RefreshCurrentView();
+
+            return Task.CompletedTask;
+        }
+
+        private void RefreshCurrentView()
+        {
+            switch (SelectedMenu)
             {
                 case "Users":
-                    CurrentView = new UsersView(); 
+                    CurrentView = new UsersView();
                     break;
 
                 case "Plants":
@@ -32,17 +45,26 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
                     break;
 
                 case "Collections":
-                    CurrentView = new PlaceholderViewModel("Widok zbiorów");
+                    CurrentView = new CollectionsView();
                     break;
 
                 case "Notifications":
-                    CurrentView = new PlaceholderViewModel("Widok powiadomień");
+                    CurrentView = new NotificationsView();
                     break;
 
                 case "Stats":
-                    CurrentView = new PlaceholderViewModel("Widok statystyk");
+                    CurrentView = new StatsView();
+                    break;
+
+                default:
+                    CurrentView = new PlaceholderViewModel(AppResources.Placeholder_SelectOption);
                     break;
             }
+        }
+
+        partial void OnSelectedMenuChanged(string? value)
+        {
+            RefreshCurrentView();
         }
     }
 

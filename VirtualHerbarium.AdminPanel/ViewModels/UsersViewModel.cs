@@ -2,15 +2,14 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using VirtualHerbarium.AdminPanel.Models;
-// using VirtualHerbarium.AdminPanel.Services;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public class UsersViewModel : INotifyPropertyChanged
     {
-        // private readonly UsersService _service;
         private readonly bool _useMock = true;
 
         public ObservableCollection<AdminUserResponse> Users { get; set; }
@@ -65,6 +64,13 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             user.active = false;
             OnPropertyChanged(nameof(Users));
+
+            MessageBox.Show(
+                AppResources.Users_Success_Banned,
+                AppResources.Success_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
 
         private async Task UnbanUser(AdminUserResponse user)
@@ -77,6 +83,13 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             user.active = true;
             OnPropertyChanged(nameof(Users));
+
+            MessageBox.Show(
+                AppResources.Users_Success_Unbanned,
+                AppResources.Success_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
 
         private async Task MakeAdmin(AdminUserResponse user)
@@ -89,6 +102,13 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             user.admin = true;
             OnPropertyChanged(nameof(Users));
+
+            MessageBox.Show(
+                AppResources.Users_Success_MadeAdmin,
+                AppResources.Success_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
 
         private async Task RemoveAdmin(AdminUserResponse user)
@@ -101,36 +121,56 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             user.admin = false;
             OnPropertyChanged(nameof(Users));
+
+            MessageBox.Show(
+                AppResources.Users_Success_RemovedAdmin,
+                AppResources.Success_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
 
         private async Task SendWarning(AdminUserResponse user)
         {
             if (_useMock)
             {
-                System.Windows.MessageBox.Show("Mock: wysłano ostrzeżenie");
+                MessageBox.Show(
+                    AppResources.Users_Success_WarningMock,
+                    AppResources.Success_Title,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
                 return;
             }
 
             // var result = await _service.SendWarningAsync(user.id, "Uwaga! Naruszenie regulaminu.");
             // if (!result.Success) { ShowError(result); return; }
 
-            System.Windows.MessageBox.Show("Ostrzeżenie wysłane.");
+            MessageBox.Show(
+                AppResources.Users_Success_WarningSent,
+                AppResources.Success_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
 
         private void ShowError(ApiResult<bool> result)
         {
             string msg = result.StatusCode switch
             {
-                401 => "Sesja wygasła. Zaloguj się ponownie.",
-                403 => "Brak uprawnień.",
-                404 => "Użytkownik nie istnieje.",
-                500 => "Błąd serwera.",
-                _ => $"Błąd: {result.Error}"
+                401 => AppResources.Error_SessionExpired,
+                403 => AppResources.Error_NoPermission,
+                404 => AppResources.Error_UserNotFound,
+                500 => AppResources.Error_Server,
+                _ => $"{AppResources.Error_Generic}: {result.Error}"
             };
 
-            System.Windows.MessageBox.Show(msg, "Błąd API",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Error);
+            MessageBox.Show(
+                msg,
+                AppResources.Error_Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

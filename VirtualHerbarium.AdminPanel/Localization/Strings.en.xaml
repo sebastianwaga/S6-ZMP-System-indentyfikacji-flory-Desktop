@@ -1,0 +1,91 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Login_Title_Window">Login</sys:String>
+    <sys:String x:Key="Login_Title_Header">Administrator Login</sys:String>
+    <sys:String x:Key="Login_Label_Username">Username</sys:String>
+    <sys:String x:Key="Login_Label_Password">Password</sys:String>
+    <sys:String x:Key="Login_Button_SignIn">Sign in</sys:String>
+
+    <sys:String x:Key="Login_Error_InvalidCredentials">Invalid login or password.</sys:String>
+    <sys:String x:Key="Login_Error_NoAdminRights">You do not have administrator privileges.</sys:String>
+
+    <sys:String x:Key="Main_Title">Virtual Herbarium – Admin Panel</sys:String>
+    <sys:String x:Key="Main_Header">Virtual Herbarium – Admin Panel</sys:String>
+    <sys:String x:Key="Main_Navigation">Navigation</sys:String>
+
+    <sys:String x:Key="Main_Menu_Users">Users</sys:String>
+    <sys:String x:Key="Main_Menu_Plants">Plants</sys:String>
+    <sys:String x:Key="Main_Menu_Collections">Collections</sys:String>
+    <sys:String x:Key="Main_Menu_Notifications">Notifications</sys:String>
+    <sys:String x:Key="Main_Menu_Stats">Statistics</sys:String>
+
+    <sys:String x:Key="Placeholder_SelectOption">Select an option from the menu</sys:String>
+
+    <sys:String x:Key="Collections_Header_Name">Name</sys:String>
+    <sys:String x:Key="Collections_Header_Owner">Owner</sys:String>
+    <sys:String x:Key="Collections_Header_PlantCount">Plants</sys:String>
+    <sys:String x:Key="Collections_Header_Shared">Shared</sys:String>
+    <sys:String x:Key="Collections_Header_Actions">Actions</sys:String>
+    <sys:String x:Key="Collections_Action_Delete">Delete</sys:String>
+
+    <sys:String x:Key="Error_FetchCollections">Failed to fetch collections.</sys:String>
+    <sys:String x:Key="Error_DeleteCollection">Failed to delete collection.</sys:String>
+    <sys:String x:Key="Confirm_DeleteCollection">Are you sure you want to delete the collection: {0}?</sys:String>
+
+    <sys:String x:Key="Plants_Header_Name">Name</sys:String>
+    <sys:String x:Key="Plants_Header_Species">Species</sys:String>
+    <sys:String x:Key="Plants_Header_Owner">Owner</sys:String>
+    <sys:String x:Key="Plants_Header_Verified">Verified</sys:String>
+    <sys:String x:Key="Plants_Header_Actions">Actions</sys:String>
+    <sys:String x:Key="Plants_Action_Delete">Delete</sys:String>
+
+    <sys:String x:Key="Error_FetchPlants">Failed to fetch plant list.</sys:String>
+    <sys:String x:Key="Error_DeletePlant">Failed to delete plant.</sys:String>
+    <sys:String x:Key="Confirm_DeletePlant">Are you sure you want to delete the plant: {0}?</sys:String>
+
+    <sys:String x:Key="Users_Header_Email">Email</sys:String>
+    <sys:String x:Key="Users_Header_Username">Username</sys:String>
+    <sys:String x:Key="Users_Header_Active">Active</sys:String>
+    <sys:String x:Key="Users_Header_Verified">Verified</sys:String>
+    <sys:String x:Key="Users_Header_Admin">Admin</sys:String>
+    <sys:String x:Key="Users_Header_Actions">Actions</sys:String>
+
+    <sys:String x:Key="Users_Action_Ban">Ban</sys:String>
+    <sys:String x:Key="Users_Action_Unban">Unban</sys:String>
+    <sys:String x:Key="Users_Action_MakeAdmin">Make Admin</sys:String>
+    <sys:String x:Key="Users_Action_RemoveAdmin">Remove Admin</sys:String>
+    <sys:String x:Key="Users_Action_Warning">Warning</sys:String>
+
+    <sys:String x:Key="Users_Success_Banned">User has been banned.</sys:String>
+    <sys:String x:Key="Users_Success_Unbanned">User has been unbanned.</sys:String>
+    <sys:String x:Key="Users_Success_MadeAdmin">User has been granted admin privileges.</sys:String>
+    <sys:String x:Key="Users_Success_RemovedAdmin">User admin privileges removed.</sys:String>
+    <sys:String x:Key="Users_Success_WarningMock">Mock: warning sent.</sys:String>
+    <sys:String x:Key="Users_Success_WarningSent">Warning sent.</sys:String>
+
+    <sys:String x:Key="Error_SessionExpired">Session expired. Please log in again.</sys:String>
+    <sys:String x:Key="Error_NoPermission">Insufficient permissions.</sys:String>
+    <sys:String x:Key="Error_UserNotFound">User not found.</sys:String>
+    <sys:String x:Key="Error_Server">Server error.</sys:String>
+    <sys:String x:Key="Error_Generic">Error</sys:String>
+
+    <sys:String x:Key="Notifications_Title">Send global notification</sys:String>
+    <sys:String x:Key="Notifications_Label_Title">Title</sys:String>
+    <sys:String x:Key="Notifications_Label_Message">Message</sys:String>
+    <sys:String x:Key="Notifications_Button_Send">Send notification</sys:String>
+
+    <sys:String x:Key="Notifications_Error_EmptyFields">Title and message cannot be empty.</sys:String>
+    <sys:String x:Key="Notifications_Error_SendFailed">Failed to send notification.</sys:String>
+    <sys:String x:Key="Notifications_Success_Sent">Notification sent (mock).</sys:String>
+
+    <sys:String x:Key="Stats_Card_Users">Users</sys:String>
+    <sys:String x:Key="Stats_Card_Plants">Plants</sys:String>
+    <sys:String x:Key="Stats_Card_Collections">Collections</sys:String>
+
+    <sys:String x:Key="Error_Title">Error</sys:String>
+    <sys:String x:Key="Success_Title">Success</sys:String>
+    <sys:String x:Key="Confirm_Title">Confirmation</sys:String>
+
+</ResourceDictionary>

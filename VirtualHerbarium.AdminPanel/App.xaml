@@ -14,6 +14,8 @@
 
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
 
+                <ResourceDictionary Source="Localization/Strings.pl.xaml" />
+
             </ResourceDictionary.MergedDictionaries>
 
             <Color x:Key="AccentGreen">#FF4CAF50</Color>

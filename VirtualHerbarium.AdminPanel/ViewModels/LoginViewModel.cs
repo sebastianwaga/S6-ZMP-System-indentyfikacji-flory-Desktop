@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using VirtualHerbarium.AdminPanel.Helpers;
 using VirtualHerbarium.AdminPanel.Services;
 using VirtualHerbarium.AdminPanel.Views;
 
@@ -35,11 +36,20 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         }
 
         public ICommand LoginCommand { get; }
+        public ICommand ChangeLanguageCommand { get; }
 
         public LoginViewModel(Window window)
         {
             _window = window;
+
             LoginCommand = new AsyncCommand(LoginAsync);
+            ChangeLanguageCommand = new RelayCommand<string>(ChangeLanguage);
+        }
+
+        private Task ChangeLanguage(string lang)
+        {
+            LanguageManager.SetLanguage(lang);
+            return Task.CompletedTask;
         }
 
         private async Task LoginAsync()
@@ -50,13 +60,13 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             if (result == null)
             {
-                ErrorMessage = "Niepoprawny login lub hasło.";
+                ErrorMessage = AppResources.Login_Error_InvalidCredentials;
                 return;
             }
 
             if (!result.admin)
             {
-                ErrorMessage = "Brak uprawnień administratora.";
+                ErrorMessage = AppResources.Login_Error_NoAdminRights;
                 return;
             }
 

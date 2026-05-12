@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:VirtualHerbarium.AdminPanel.ViewModels"
         xmlns:views="clr-namespace:VirtualHerbarium.AdminPanel.Views"
         mc:Ignorable="d"
-        Title="Virtual Herbarium – Panel administratora"
+        Title="{DynamicResource Main_Title}"
         Height="600" Width="1100"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource AccentGreenBrush}">
@@ -31,27 +31,54 @@
         <DockPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
                    Background="{DynamicResource PrimaryHueMidBrush}"
                    LastChildFill="True">
-            <TextBlock Text="Virtual Herbarium – Panel administratora"
+
+            <TextBlock Text="{DynamicResource Main_Header}"
                        Foreground="White"
                        FontSize="18"
                        VerticalAlignment="Center"
                        Margin="16,0" />
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,16,0">
+
+                <Button Content="PL"
+                        Width="40"
+                        Margin="0,0,6,0"
+                        Command="{Binding ChangeLanguageCommand}"
+                        CommandParameter="pl"
+                        Background="White"
+                        Foreground="Black"
+                        BorderThickness="0"
+                        Cursor="Hand"/>
+
+                <Button Content="EN"
+                        Width="40"
+                        Command="{Binding ChangeLanguageCommand}"
+                        CommandParameter="en"
+                        Background="White"
+                        Foreground="Black"
+                        BorderThickness="0"
+                        Cursor="Hand"/>
+            </StackPanel>
+
         </DockPanel>
 
         <StackPanel Grid.Column="0" Grid.Row="1"
                     Background="White">
-            <TextBlock Text="Nawigacja"
+            <TextBlock Text="{DynamicResource Main_Navigation}"
                        Margin="16,16,16,8"
                        FontWeight="Bold"
                        FontSize="14" />
 
             <ListBox SelectedValuePath="Tag"
                      SelectedValue="{Binding SelectedMenu}">
-                <ListBoxItem Content="Użytkownicy" Tag="Users" />
-                <ListBoxItem Content="Rośliny" Tag="Plants" />
-                <ListBoxItem Content="Zbiory" Tag="Collections" />
-                <ListBoxItem Content="Powiadomienia" Tag="Notifications" />
-                <ListBoxItem Content="Statystyki" Tag="Stats" />
+                <ListBoxItem Content="{DynamicResource Main_Menu_Users}" Tag="Users" />
+                <ListBoxItem Content="{DynamicResource Main_Menu_Plants}" Tag="Plants" />
+                <ListBoxItem Content="{DynamicResource Main_Menu_Collections}" Tag="Collections" />
+                <ListBoxItem Content="{DynamicResource Main_Menu_Notifications}" Tag="Notifications" />
+                <ListBoxItem Content="{DynamicResource Main_Menu_Stats}" Tag="Stats" />
             </ListBox>
         </StackPanel>
 
