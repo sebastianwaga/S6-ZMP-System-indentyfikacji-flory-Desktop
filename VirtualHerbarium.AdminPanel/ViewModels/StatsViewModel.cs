@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using VirtualHerbarium.AdminPanel.Models;
 using VirtualHerbarium.AdminPanel.Services;
 
@@ -38,6 +39,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         private async void LoadStats()
         {
+
             var result = await _service.GetStatsAsync();
 
             if (!result.Success || result.Data == null)

@@ -11,28 +11,35 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public class LoginViewModel : INotifyPropertyChanged
     {
-        private readonly AuthService _auth = new();
+        private readonly AuthService _auth = AuthService.Instance;
         private readonly Window _window;
+
+        private bool _isBusy;
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set { _isBusy = value; OnPropertyChanged(); }
+        }
 
         private string _login = string.Empty;
         public string Login
         {
             get => _login;
-            set { if (_login != value) { _login = value; OnPropertyChanged(); } }
+            set { _login = value; OnPropertyChanged(); }
         }
 
         private string _password = string.Empty;
         public string Password
         {
             get => _password;
-            set { if (_password != value) { _password = value; OnPropertyChanged(); } }
+            set { _password = value; OnPropertyChanged(); }
         }
 
         private string _errorMessage = string.Empty;
         public string ErrorMessage
         {
             get => _errorMessage;
-            set { if (_errorMessage != value) { _errorMessage = value; OnPropertyChanged(); } }
+            set { _errorMessage = value; OnPropertyChanged(); }
         }
 
         public ICommand LoginCommand { get; }
@@ -54,25 +61,47 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         private async Task LoginAsync()
         {
+            if (IsBusy)
+                return;
+
+            IsBusy = true;
             ErrorMessage = "";
 
             var result = await _auth.LoginAsync(Login, Password);
 
+            if (result?.message == "LOCKED")
+            {
+                ErrorMessage = "Zbyt wiele nieudanych prób. Spróbuj ponownie za 10 sekund.";
+                IsBusy = false;
+                return;
+            }
+
+            if (result?.message == "NETWORK_ERROR")
+            {
+                ErrorMessage = "Brak połączenia z serwerem.";
+                IsBusy = false;
+                return;
+            }
+
             if (result == null)
             {
                 ErrorMessage = AppResources.Login_Error_InvalidCredentials;
+                IsBusy = false;
                 return;
             }
 
             if (!result.admin)
             {
                 ErrorMessage = AppResources.Login_Error_NoAdminRights;
+                IsBusy = false;
                 return;
             }
 
             var main = new MainWindow();
             main.Show();
             _window.Close();
+
+            IsBusy = false;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -93,6 +122,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         {
             _isExecuting = true;
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+
             try { await _execute(); }
             finally
             {

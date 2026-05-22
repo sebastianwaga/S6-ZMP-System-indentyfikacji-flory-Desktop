@@ -5,12 +5,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
 
-	<Grid Margin="20">
-		<Border Background="White"
+    <Grid Margin="20">
+        <Border Background="White"
                 CornerRadius="12"
                 Padding="16">
 
-			<DataGrid ItemsSource="{Binding Plants}"
+            <DataGrid ItemsSource="{Binding Plants}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       RowHeight="40"
@@ -19,36 +19,46 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-				<DataGrid.ColumnHeaderStyle>
-					<Style TargetType="DataGridColumnHeader">
-						<Setter Property="Background" Value="#388E3C"/>
-						<Setter Property="Foreground" Value="White"/>
-						<Setter Property="FontWeight" Value="Bold"/>
-						<Setter Property="Padding" Value="8"/>
-					</Style>
-				</DataGrid.ColumnHeaderStyle>
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#388E3C"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Padding" Value="8"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
 
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="{DynamicResource Plants_Header_Name}" Binding="{Binding name}" Width="200" />
-					<DataGridTextColumn Header="{DynamicResource Plants_Header_Species}" Binding="{Binding species}" Width="200" />
-					<DataGridTextColumn Header="{DynamicResource Plants_Header_Owner}" Binding="{Binding owner}" Width="150" />
-					<DataGridCheckBoxColumn Header="{DynamicResource Plants_Header_Verified}" Binding="{Binding verified}" Width="120" />
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{DynamicResource Plants_Header_Name}"
+                                        Binding="{Binding name}"
+                                        Width="200" />
 
-					<DataGridTemplateColumn Header="{DynamicResource Plants_Header_Actions}" Width="120">
-						<DataGridTemplateColumn.CellTemplate>
-							<DataTemplate>
-								<Button Content="{DynamicResource Plants_Action_Delete}"
-                                        Background="#D32F2F"
-                                        Foreground="White"
-                                        Padding="8 4"
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}" />
-							</DataTemplate>
-						</DataGridTemplateColumn.CellTemplate>
-					</DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{DynamicResource Plants_Header_Actions}" Width="200">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 
-				</DataGrid.Columns>
-			</DataGrid>
-		</Border>
-	</Grid>
+                                    <Button Content="Szczegóły"
+                                            Background="#0288D1"
+                                            Foreground="White"
+                                            Padding="8 4"
+                                            Margin="0 0 8 0"
+                                            Command="{Binding DataContext.ShowPlantDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                    <Button Content="{DynamicResource Plants_Action_Delete}"
+                                            Background="#D32F2F"
+                                            Foreground="White"
+                                            Padding="8 4"
+                                            Command="{Binding DataContext.DeletePlantCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
 </UserControl>

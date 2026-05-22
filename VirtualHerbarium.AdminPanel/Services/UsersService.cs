@@ -1,7 +1,8 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using VirtualHerbarium.AdminPanel.Models;
 
 namespace VirtualHerbarium.AdminPanel.Services
@@ -10,15 +11,37 @@ namespace VirtualHerbarium.AdminPanel.Services
     {
         private readonly HttpClient _http;
 
-        public UsersService(string token)
+        public UsersService()
         {
             _http = new HttpClient
             {
-                BaseAddress = new Uri("http://localhost:8080")
+                BaseAddress = new Uri("https://ezielnik-production.up.railway.app"),
+                Timeout = TimeSpan.FromSeconds(10)
             };
 
-            _http.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            if (AuthService.Instance.Token != null)
+            {
+                _http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
+            }
+        }
+
+        private ApiResult<T> HandleError<T>(HttpResponseMessage response)
+        {
+            int code = (int)response.StatusCode;
+
+            return new ApiResult<T>
+            {
+                Success = false,
+                StatusCode = code,
+                Error = code switch
+                {
+                    401 => AppResources.Error_SessionExpired,
+                    403 => AppResources.Error_NoPermission,
+                    404 => AppResources.Error_UserNotFound,
+                    _ => AppResources.Error_Server
+                }
+            };
         }
 
         public async Task<ApiResult<List<AdminUserResponse>>> GetUsersAsync()
@@ -33,20 +56,62 @@ namespace VirtualHerbarium.AdminPanel.Services
                     return new ApiResult<List<AdminUserResponse>> { Success = true, Data = data };
                 }
 
-                return new ApiResult<List<AdminUserResponse>>
-                {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
-                };
+                return HandleError<List<AdminUserResponse>>(response);
             }
-            catch (Exception ex)
+            catch
             {
                 return new ApiResult<List<AdminUserResponse>>
                 {
                     Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
+                    Error = AppResources.Error_Server
+                };
+            }
+        }
+
+        public async Task<ApiResult<UserDetailsResponse>> GetUserDetailsAsync(string id)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"/stats/users/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadFromJsonAsync<UserDetailsResponse>();
+                    return new ApiResult<UserDetailsResponse> { Success = true, Data = data };
+                }
+
+                return HandleError<UserDetailsResponse>(response);
+            }
+            catch
+            {
+                return new ApiResult<UserDetailsResponse>
+                {
+                    Success = false,
+                    Error = AppResources.Error_Server
+                };
+            }
+        }
+
+        public async Task<ApiResult<UserFriendsResponse>> GetUserFriendsAsync(string id)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"/stats/users/{id}/friends");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadFromJsonAsync<UserFriendsResponse>();
+                    return new ApiResult<UserFriendsResponse> { Success = true, Data = data };
+                }
+
+                return HandleError<UserFriendsResponse>(response);
+            }
+            catch
+            {
+                return new ApiResult<UserFriendsResponse>
+                {
+                    Success = false,
+                    Error = AppResources.Error_Server
                 };
             }
         }
@@ -56,25 +121,13 @@ namespace VirtualHerbarium.AdminPanel.Services
             try
             {
                 var response = await _http.PatchAsync($"/users/{id}/ban", null);
-
-                if (response.IsSuccessStatusCode)
-                    return new ApiResult<bool> { Success = true, Data = true };
-
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
-                };
+                return response.IsSuccessStatusCode
+                    ? new ApiResult<bool> { Success = true, Data = true }
+                    : HandleError<bool>(response);
             }
-            catch (Exception ex)
+            catch
             {
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
-                };
+                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
             }
         }
 
@@ -83,25 +136,13 @@ namespace VirtualHerbarium.AdminPanel.Services
             try
             {
                 var response = await _http.PatchAsync($"/users/{id}/unban", null);
-
-                if (response.IsSuccessStatusCode)
-                    return new ApiResult<bool> { Success = true, Data = true };
-
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
-                };
+                return response.IsSuccessStatusCode
+                    ? new ApiResult<bool> { Success = true, Data = true }
+                    : HandleError<bool>(response);
             }
-            catch (Exception ex)
+            catch
             {
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
-                };
+                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
             }
         }
 
@@ -110,25 +151,13 @@ namespace VirtualHerbarium.AdminPanel.Services
             try
             {
                 var response = await _http.PatchAsync($"/users/{id}/make-admin", null);
-
-                if (response.IsSuccessStatusCode)
-                    return new ApiResult<bool> { Success = true, Data = true };
-
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
-                };
+                return response.IsSuccessStatusCode
+                    ? new ApiResult<bool> { Success = true, Data = true }
+                    : HandleError<bool>(response);
             }
-            catch (Exception ex)
+            catch
             {
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
-                };
+                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
             }
         }
 
@@ -137,54 +166,27 @@ namespace VirtualHerbarium.AdminPanel.Services
             try
             {
                 var response = await _http.PatchAsync($"/users/{id}/remove-admin", null);
-
-                if (response.IsSuccessStatusCode)
-                    return new ApiResult<bool> { Success = true, Data = true };
-
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
-                };
+                return response.IsSuccessStatusCode
+                    ? new ApiResult<bool> { Success = true, Data = true }
+                    : HandleError<bool>(response);
             }
-            catch (Exception ex)
+            catch
             {
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
-                };
+                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
             }
         }
 
-        public async Task<ApiResult<bool>> SendWarningAsync(string id, string message)
+        public async Task<bool> SendWarningAsync(string userId, string subject, string message)
         {
-            try
-            {
-                var body = new { message };
-                var response = await _http.PostAsJsonAsync($"/users/{id}/warning", body);
+            var body = new { subject, message };
 
-                if (response.IsSuccessStatusCode)
-                    return new ApiResult<bool> { Success = true, Data = true };
+            var response = await _http.PostAsJsonAsync($"/users/{userId}/warning", body);
 
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResult<bool>
-                {
-                    Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
-                };
-            }
+            if (!response.IsSuccessStatusCode)
+                return false;
+
+            var text = await response.Content.ReadAsStringAsync();
+            return text.Contains("success", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

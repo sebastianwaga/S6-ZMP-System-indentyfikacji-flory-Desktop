@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using VirtualHerbarium.AdminPanel.Models;
 using VirtualHerbarium.AdminPanel.Services;
+using VirtualHerbarium.AdminPanel.Views;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
@@ -15,61 +16,90 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         public ObservableCollection<PlantResponse> Plants { get; set; }
 
-        public ICommand DeleteCommand { get; }
+        public ICommand DeletePlantCommand { get; }
+        public ICommand RefreshCommand { get; }
+        public ICommand ShowPlantDetailsCommand { get; }
+
+        private bool _isBusy;
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set { _isBusy = value; OnPropertyChanged(); }
+        }
 
         public PlantsViewModel()
         {
             Plants = new ObservableCollection<PlantResponse>();
-            DeleteCommand = new RelayCommand<PlantResponse>(async p => await DeletePlant(p));
+
+            DeletePlantCommand = new RelayCommand<PlantResponse>(async p => await DeletePlant(p));
+            RefreshCommand = new RelayCommand<object>(async _ => await LoadPlants());
+            ShowPlantDetailsCommand = new RelayCommand<PlantResponse>(async p => await ShowPlantDetails(p));
 
             LoadPlants();
         }
 
-        private async void LoadPlants()
+        private async Task LoadPlants()
         {
+            IsBusy = true;
+
             var result = await _service.GetPlantsAsync();
 
             if (!result.Success || result.Data == null)
             {
-                ShowError(AppResources.Error_FetchPlants);
+                MessageBox.Show(AppResources.Error_Server,
+                AppResources.Error_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                IsBusy = false;
                 return;
             }
 
             Plants = new ObservableCollection<PlantResponse>(result.Data);
             OnPropertyChanged(nameof(Plants));
+
+            IsBusy = false;
         }
 
         private async Task DeletePlant(PlantResponse plant)
         {
-            var confirm = MessageBox.Show(
-                string.Format(AppResources.Confirm_DeletePlant, plant.name),
-                AppResources.Confirm_Title,
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning
-            );
-
-            if (confirm != MessageBoxResult.Yes)
+            if (MessageBox.Show($"Usunąć roślinę \"{plant.name}\"?",
+                    "Potwierdzenie",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning) != MessageBoxResult.Yes)
                 return;
 
-            var result = await _service.DeletePlantAsync(plant.id);
+            IsBusy = true;
+
+            var result = await _service.DeletePlantAsync(plant.herbariumId, plant.id);
 
             if (!result.Success)
             {
-                ShowError(AppResources.Error_DeletePlant);
+                MessageBox.Show(AppResources.Error_Server,
+                AppResources.Error_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                IsBusy = false;
                 return;
             }
 
             Plants.Remove(plant);
+            IsBusy = false;
         }
 
-        private void ShowError(string message)
+        private async Task ShowPlantDetails(PlantResponse plant)
         {
-            MessageBox.Show(
-                message,
-                AppResources.Error_Title,
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
+            var result = await _service.GetPlantDetailsAsync(plant.herbariumId, plant.id);
+
+            if (!result.Success || result.Data == null)
+            {
+                MessageBox.Show(result.Error ?? "Nie udało się pobrać szczegółów rośliny.",
+                    "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var window = new PlantDetailsView
+            {
+                DataContext = new PlantDetailsViewModel(result.Data, _service)
+            };
+
+            window.Show();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

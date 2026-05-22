@@ -5,12 +5,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
 
-    <Grid Margin="20">
-        <Border Background="White"
+	<Grid Margin="20">
+		<Border Background="White"
                 CornerRadius="12"
                 Padding="16">
 
-            <DataGrid ItemsSource="{Binding Collections}"
+			<DataGrid ItemsSource="{Binding Collections}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       RowHeight="40"
@@ -19,36 +19,48 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-                <DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#388E3C"/>
-                        <Setter Property="Foreground" Value="White"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
-                        <Setter Property="Padding" Value="8"/>
-                    </Style>
-                </DataGrid.ColumnHeaderStyle>
+				<DataGrid.ColumnHeaderStyle>
+					<Style TargetType="DataGridColumnHeader">
+						<Setter Property="Background" Value="#388E3C"/>
+						<Setter Property="Foreground" Value="White"/>
+						<Setter Property="FontWeight" Value="Bold"/>
+						<Setter Property="Padding" Value="8"/>
+					</Style>
+				</DataGrid.ColumnHeaderStyle>
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="{DynamicResource Collections_Header_Name}" Binding="{Binding name}" Width="200" />
-                    <DataGridTextColumn Header="{DynamicResource Collections_Header_Owner}" Binding="{Binding owner}" Width="150" />
-                    <DataGridTextColumn Header="{DynamicResource Collections_Header_PlantCount}" Binding="{Binding plantCount}" Width="100" />
-                    <DataGridCheckBoxColumn Header="{DynamicResource Collections_Header_Shared}" Binding="{Binding shared}" Width="120" />
+				<DataGrid.Columns>
 
-                    <DataGridTemplateColumn Header="{DynamicResource Collections_Header_Actions}" Width="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="{DynamicResource Collections_Action_Delete}"
-                                        Background="#D32F2F"
-                                        Foreground="White"
-                                        Padding="8 4"
-                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+					<DataGridTextColumn Header="Nazwa" Binding="{Binding name}" Width="200" />
+					<DataGridTextColumn Header="Właściciel" Binding="{Binding OwnerDisplay}" Width="150" />
 
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
-    </Grid>
+					<DataGridTemplateColumn Header="Akcje" Width="250">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal">
+
+									<Button Content="Szczegóły"
+                                            Background="#0288D1"
+                                            Foreground="White"
+                                            Padding="8 4"
+                                            Margin="0 0 6 0"
+                                            Command="{Binding DataContext.ShowDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+									<Button Content="Usuń"
+                                            Background="#D32F2F"
+                                            Foreground="White"
+                                            Padding="8 4"
+                                            Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+								</StackPanel>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+
+				</DataGrid.Columns>
+
+			</DataGrid>
+		</Border>
+	</Grid>
 </UserControl>

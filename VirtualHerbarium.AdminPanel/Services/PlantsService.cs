@@ -1,58 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using VirtualHerbarium.AdminPanel.Models;
 
 namespace VirtualHerbarium.AdminPanel.Services
 {
     public class PlantsService
     {
-        private readonly bool _useMock = true;
         private readonly HttpClient _http;
 
         public PlantsService()
         {
             _http = new HttpClient
             {
-                BaseAddress = new Uri("http://localhost:8080")
+                BaseAddress = new Uri("https://ezielnik-production.up.railway.app")
             };
+
+            if (!string.IsNullOrEmpty(AuthService.Instance.Token))
+            {
+                _http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
+            }
+        }
+        public async Task<PlantPhotoResponse?> GetPhotoMetadataAsync(string herbariumId, string plantId, string photoId)
+        {
+            try
+            {
+                var response = await _http.GetAsync(
+                    $"/herbaria/{herbariumId}/plants/{plantId}/photos/{photoId}");
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                return await response.Content.ReadFromJsonAsync<PlantPhotoResponse>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<BitmapImage?> LoadPhotoAsync(string relativeUrl)
+        {
+            try
+            {
+                if (!relativeUrl.StartsWith("http"))
+                {
+                    relativeUrl = relativeUrl.TrimStart('/');
+                    relativeUrl = $"{_http.BaseAddress}{relativeUrl}";
+                }
+
+                var request = new HttpRequestMessage(HttpMethod.Get, relativeUrl);
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
+
+                var response = await _http.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+
+                if (bytes.Length == 0)
+                    return null;
+
+                var image = new BitmapImage();
+                using (var ms = new MemoryStream(bytes))
+                {
+                    image.BeginInit();
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.StreamSource = ms;
+                    image.EndInit();
+                }
+
+                return image;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public async Task<ApiResult<List<PlantResponse>>> GetPlantsAsync()
         {
-            if (_useMock)
-            {
-                await Task.Delay(200);
-
-                return new ApiResult<List<PlantResponse>>
-                {
-                    Success = true,
-                    Data = new List<PlantResponse>
-                    {
-                        new PlantResponse { id="1", name="Dąb szypułkowy", species="Quercus robur", owner="user1", verified=true },
-                        new PlantResponse { id="2", name="Sosna zwyczajna", species="Pinus sylvestris", owner="user2", verified=false },
-                        new PlantResponse { id="3", name="Brzoza brodawkowata", species="Betula pendula", owner="admin", verified=true }
-                    }
-                };
-            }
-
             try
             {
-                var response = await _http.GetAsync("/plants");
+                var herbariaResponse = await _http.GetAsync("/stats/herbaria");
 
-                if (response.IsSuccessStatusCode)
+                if (!herbariaResponse.IsSuccessStatusCode)
                 {
-                    var data = await response.Content.ReadFromJsonAsync<List<PlantResponse>>();
-                    return new ApiResult<List<PlantResponse>> { Success = true, Data = data };
+                    return new ApiResult<List<PlantResponse>>
+                    {
+                        Success = false,
+                        Error = await herbariaResponse.Content.ReadAsStringAsync(),
+                        StatusCode = (int)herbariaResponse.StatusCode
+                    };
+                }
+
+                var herbaria = await herbariaResponse.Content.ReadFromJsonAsync<List<HerbariumStatsResponse>>();
+
+                var allPlants = new List<PlantResponse>();
+
+                foreach (var herbarium in herbaria)
+                {
+                    var plantsResponse = await _http.GetAsync($"/herbaria/{herbarium.id}/plants");
+
+                    if (!plantsResponse.IsSuccessStatusCode)
+                        continue;
+
+                    var plants = await plantsResponse.Content.ReadFromJsonAsync<List<PlantResponse>>();
+
+                    if (plants != null)
+                    {
+                        foreach (var p in plants)
+                            p.herbariumId = herbarium.id;
+
+                        allPlants.AddRange(plants);
+                    }
                 }
 
                 return new ApiResult<List<PlantResponse>>
                 {
-                    Success = false,
-                    Error = await response.Content.ReadAsStringAsync(),
-                    StatusCode = (int)response.StatusCode
+                    Success = true,
+                    Data = allPlants
                 };
             }
             catch (Exception ex)
@@ -65,18 +140,45 @@ namespace VirtualHerbarium.AdminPanel.Services
                 };
             }
         }
-
-        public async Task<ApiResult<bool>> DeletePlantAsync(string id)
+        public async Task<ApiResult<PlantDetailsResponse>> GetPlantDetailsAsync(string herbariumId, string plantId)
         {
-            if (_useMock)
-            {
-                await Task.Delay(100);
-                return new ApiResult<bool> { Success = true, Data = true };
-            }
-
             try
             {
-                var response = await _http.DeleteAsync($"/plants/{id}");
+                var response = await _http.GetAsync($"/herbaria/{herbariumId}/plants/{plantId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ApiResult<PlantDetailsResponse>
+                    {
+                        Success = false,
+                        StatusCode = (int)response.StatusCode
+                    };
+                }
+
+                var data = await response.Content.ReadFromJsonAsync<PlantDetailsResponse>();
+
+                return new ApiResult<PlantDetailsResponse>
+                {
+                    Success = true,
+                    Data = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<PlantDetailsResponse>
+                {
+                    Success = false,
+                    Error = ex.Message,
+                    StatusCode = 0
+                };
+            }
+        }
+
+        public async Task<ApiResult<bool>> DeletePlantAsync(string herbariumId, string plantId)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"/herbaria/{herbariumId}/plants/{plantId}");
 
                 if (response.IsSuccessStatusCode)
                     return new ApiResult<bool> { Success = true, Data = true };

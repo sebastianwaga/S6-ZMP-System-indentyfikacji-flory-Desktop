@@ -17,6 +17,8 @@
                 <ResourceDictionary Source="Localization/Strings.pl.xaml" />
 
             </ResourceDictionary.MergedDictionaries>
+            
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
             <Color x:Key="AccentGreen">#FF4CAF50</Color>
             <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource AccentGreen}" />

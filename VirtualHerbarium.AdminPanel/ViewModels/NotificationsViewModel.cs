@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,68 +13,42 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
     {
         private readonly NotificationsService _service = new NotificationsService();
 
-        private string _title;
-        public string Title
-        {
-            get => _title;
-            set { _title = value; OnPropertyChanged(); }
-        }
+        public ObservableCollection<NotificationResponse> Notifications { get; set; }
+            = new ObservableCollection<NotificationResponse>();
 
-        private string _message;
-        public string Message
-        {
-            get => _message;
-            set { _message = value; OnPropertyChanged(); }
-        }
-
-        public ICommand SendCommand { get; }
+        public ICommand RefreshCommand { get; }
+        public ICommand MarkAllCommand { get; }
+        public ICommand MarkReadCommand { get; }
 
         public NotificationsViewModel()
         {
-            SendCommand = new RelayCommand<object>(async _ => await Send());
+            RefreshCommand = new RelayCommand<object>(async _ => await Load());
+            MarkAllCommand = new RelayCommand<object>(async _ => await MarkAll());
+            MarkReadCommand = new RelayCommand<NotificationResponse>(async n => await MarkOne(n));
+
+            _ = Load();
         }
 
-        private async Task Send()
+        private async Task Load()
         {
-            if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(Message))
-            {
-                MessageBox.Show(
-                    AppResources.Notifications_Error_EmptyFields,
-                    AppResources.Error_Title,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning
-                );
-                return;
-            }
+            var list = await _service.GetUnreadAsync();
+            Notifications.Clear();
 
-            var request = new NotificationRequest
-            {
-                title = Title,
-                message = Message
-            };
+            if (list != null)
+                foreach (var n in list)
+                    Notifications.Add(n);
+        }
 
-            var result = await _service.SendNotificationAsync(request);
+        private async Task MarkOne(NotificationResponse n)
+        {
+            if (await _service.MarkAsReadAsync(n.id))
+                await Load();
+        }
 
-            if (!result.Success)
-            {
-                MessageBox.Show(
-                    AppResources.Notifications_Error_SendFailed,
-                    AppResources.Error_Title,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
-                return;
-            }
-
-            MessageBox.Show(
-                AppResources.Notifications_Success_Sent,
-                AppResources.Success_Title,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information
-            );
-
-            Title = string.Empty;
-            Message = string.Empty;
+        private async Task MarkAll()
+        {
+            if (await _service.MarkAllAsReadAsync())
+                await Load();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

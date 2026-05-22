@@ -5,27 +5,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
 
-	<UserControl.Resources>
-		<Style x:Key="ActionButton" TargetType="Button">
-			<Setter Property="Padding" Value="8 4"/>
-			<Setter Property="Margin" Value="0,0,6,0"/>
-			<Setter Property="Foreground" Value="White"/>
-			<Setter Property="MinWidth" Value="90"/>
-			<Setter Property="Height" Value="32"/>
-			<Setter Property="FontSize" Value="13"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="BorderThickness" Value="0"/>
-		</Style>
-	</UserControl.Resources>
+    <UserControl.Resources>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="8 4"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="MinWidth" Value="90"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </UserControl.Resources>
 
-	<Grid Margin="20">
+    <Grid Margin="20">
 
-		<Border Background="White"
+        <Border Background="White"
                 CornerRadius="12"
                 Padding="16"
                 SnapsToDevicePixels="True">
 
-			<DataGrid ItemsSource="{Binding Users}"
+            <DataGrid ItemsSource="{Binding Users}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       RowHeight="40"
@@ -34,64 +34,99 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-				<DataGrid.ColumnHeaderStyle>
-					<Style TargetType="DataGridColumnHeader">
-						<Setter Property="Background" Value="#388E3C"/>
-						<Setter Property="Foreground" Value="White"/>
-						<Setter Property="FontWeight" Value="Bold"/>
-						<Setter Property="Padding" Value="8"/>
-					</Style>
-				</DataGrid.ColumnHeaderStyle>
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#388E3C"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Padding" Value="8"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
 
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="{DynamicResource Users_Header_Email}" Binding="{Binding email}" Width="200" />
-					<DataGridTextColumn Header="{DynamicResource Users_Header_Username}" Binding="{Binding username}" Width="150" />
-					<DataGridCheckBoxColumn Header="{DynamicResource Users_Header_Active}" Binding="{Binding active}" Width="80" />
-					<DataGridCheckBoxColumn Header="{DynamicResource Users_Header_Verified}" Binding="{Binding verified}" Width="100" />
-					<DataGridCheckBoxColumn Header="{DynamicResource Users_Header_Admin}" Binding="{Binding admin}" Width="80" />
+                <DataGrid.Columns>
 
-					<DataGridTemplateColumn Header="{DynamicResource Users_Header_Actions}" Width="Auto" MinWidth="520">
-						<DataGridTemplateColumn.CellTemplate>
-							<DataTemplate>
-								<StackPanel Orientation="Horizontal">
+                    <DataGridTextColumn Header="{DynamicResource Users_Header_Email}"
+                                        Binding="{Binding email}" Width="200" />
 
-									<Button Content="{DynamicResource Users_Action_Ban}"
+                    <DataGridTextColumn Header="{DynamicResource Users_Header_Username}"
+                                        Binding="{Binding username}" Width="150" />
+
+                    <DataGridCheckBoxColumn Header="{DynamicResource Users_Header_Active}"
+                                            Binding="{Binding active}" Width="80" />
+
+                    <DataGridCheckBoxColumn Header="{DynamicResource Users_Header_Verified}"
+                                            Binding="{Binding verified}" Width="100" />
+
+                    <DataGridCheckBoxColumn Header="{DynamicResource Users_Header_Admin}"
+                                            Binding="{Binding admin}" Width="80" />
+
+                    <DataGridTemplateColumn Header="{DynamicResource Users_Header_Actions}" Width="Auto" MinWidth="700">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+
+                                    <Button Content="Szczegóły"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#0288D1"
+                                            Command="{Binding DataContext.ShowDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                    <Button Content="Znajomi"
+                                            Style="{StaticResource ActionButton}"
+                                            Background="#7B1FA2"
+                                            Command="{Binding DataContext.ShowFriendsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+
+                                    <Button Content="{DynamicResource Users_Action_Ban}"
                                             Style="{StaticResource ActionButton}"
                                             Background="#D32F2F"
                                             Command="{Binding DataContext.BanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" />
 
-									<Button Content="{DynamicResource Users_Action_Unban}"
+                                    <Button Content="{DynamicResource Users_Action_Unban}"
                                             Style="{StaticResource ActionButton}"
                                             Background="#4CAF50"
                                             Command="{Binding DataContext.UnbanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" />
 
-									<Button Content="{DynamicResource Users_Action_MakeAdmin}"
+                                    <Button Content="{DynamicResource Users_Action_MakeAdmin}"
                                             Style="{StaticResource ActionButton}"
                                             Background="#1976D2"
                                             Command="{Binding DataContext.MakeAdminCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" />
 
-									<Button Content="{DynamicResource Users_Action_RemoveAdmin}"
+                                    <Button Content="{DynamicResource Users_Action_RemoveAdmin}"
                                             Style="{StaticResource ActionButton}"
                                             Background="#757575"
                                             Command="{Binding DataContext.RemoveAdminCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" />
 
-									<Button Content="{DynamicResource Users_Action_Warning}"
+                                    <Button Content="{DynamicResource Users_Action_Warning}"
                                             Style="{StaticResource ActionButton}"
                                             Background="#FFA000"
                                             Command="{Binding DataContext.WarningCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" />
 
-								</StackPanel>
-							</DataTemplate>
-						</DataGridTemplateColumn.CellTemplate>
-					</DataGridTemplateColumn>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-				</DataGrid.Columns>
-			</DataGrid>
-		</Border>
-	</Grid>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Grid Background="#80000000"
+              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Width="200" Height="20" IsIndeterminate="True"/>
+                <TextBlock Text="Przetwarzanie..."
+                           Foreground="White"
+                           FontSize="16"
+                           Margin="0,10,0,0"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
 </UserControl>

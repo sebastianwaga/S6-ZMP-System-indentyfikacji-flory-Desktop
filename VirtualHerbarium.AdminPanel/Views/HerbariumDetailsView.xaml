@@ -1,0 +1,56 @@
+﻿<Window x:Class="VirtualHerbarium.AdminPanel.Views.HerbariumDetailsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Szczegóły zielnika"
+        Height="550" Width="650"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Grid Margin="20">
+
+        <StackPanel>
+
+            <TextBlock Text="Szczegóły zielnika"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Margin="0 0 0 20"/>
+
+            <TextBlock Text="{Binding NameDisplay}" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Text="{Binding DescriptionDisplay}" Margin="0 5"/>
+            <TextBlock Text="{Binding PublicDisplay}" Margin="0 5"/>
+            <TextBlock Text="{Binding CreatedDisplay}" Margin="0 5"/>
+            <TextBlock Text="{Binding UpdatedDisplay}" Margin="0 5"/>
+            <TextBlock Text="{Binding PlantCountDisplay}" Margin="0 5"/>
+
+            <Separator Margin="0 10"/>
+
+            <TextBlock Text="Rośliny:" FontWeight="Bold" Margin="0 5"/>
+
+            <ListBox ItemsSource="{Binding Plants}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="0 5">
+
+                            <TextBlock Text="{Binding name}"
+                                       VerticalAlignment="Center"
+                                       Width="250"
+                                       FontWeight="Bold"/>
+
+                            <Button Content="Szczegóły"
+                                    Background="#0288D1"
+                                    Foreground="White"
+                                    Padding="8 4"
+                                    Margin="10 0 0 0"
+                                    Command="{Binding DataContext.ShowPlantDetailsCommand,
+                                                      RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"/>
+
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+        </StackPanel>
+
+    </Grid>
+</Window>
