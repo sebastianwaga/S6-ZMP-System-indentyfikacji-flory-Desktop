@@ -2,16 +2,17 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Windows;
 using VirtualHerbarium.AdminPanel.Models;
 
 namespace VirtualHerbarium.AdminPanel.Services
 {
     public class StatsService
     {
+        public static StatsService Instance { get; } = new StatsService();
+
         private readonly HttpClient _http;
 
-        public StatsService()
+        private StatsService()
         {
             _http = new HttpClient
             {
@@ -25,21 +26,15 @@ namespace VirtualHerbarium.AdminPanel.Services
             }
         }
 
-        private class OverviewDto
-        {
-            public int totalUsers { get; set; }
-            public int totalHerbaria { get; set; }
-            public int totalPlants { get; set; }
-        }
-
-        public async Task<ApiResult<StatsResponse>> GetStatsAsync()
+        public async Task<ApiResult<StatsOverviewResponse>> GetOverviewAsync()
         {
             try
             {
                 var response = await _http.GetAsync("/stats/overview");
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new ApiResult<StatsResponse>
+                    return new ApiResult<StatsOverviewResponse>
                     {
                         Success = false,
                         Error = await response.Content.ReadAsStringAsync(),
@@ -47,35 +42,20 @@ namespace VirtualHerbarium.AdminPanel.Services
                     };
                 }
 
-                var dto = await response.Content.ReadFromJsonAsync<OverviewDto>();
-                if (dto == null)
-                {
-                    return new ApiResult<StatsResponse>
-                    {
-                        Success = false,
-                        Error = "Brak danych z /stats/overview",
-                        StatusCode = 0
-                    };
-                }
+                var data = await response.Content.ReadFromJsonAsync<StatsOverviewResponse>();
 
-                return new ApiResult<StatsResponse>
+                return new ApiResult<StatsOverviewResponse>
                 {
                     Success = true,
-                    Data = new StatsResponse
-                    {
-                        users = dto.totalUsers,
-                        plants = dto.totalPlants,
-                        collections = dto.totalHerbaria
-                    }
+                    Data = data
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResult<StatsResponse>
+                return new ApiResult<StatsOverviewResponse>
                 {
                     Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
+                    Error = ex.Message
                 };
             }
         }

@@ -39,13 +39,12 @@
                                        Stretch="UniformToFill"
                                        Margin="0 0 10 0"/>
 
-                                <StackPanel Width="350">
-                                    <TextBlock Text="{Binding description}" FontStyle="Italic"/>
-                                    <TextBlock Text="{Binding confidence, StringFormat='P0'}"/>
-                                    <TextBlock Text="{Binding createdAt}"/>
+                                    <StackPanel Width="350">
+                                        <TextBlock Text="{Binding Metadata.description}" FontStyle="Italic"/>
+                                        <TextBlock Text="{Binding Metadata.confidence, StringFormat='P0'}"/>
+                                        <TextBlock Text="{Binding Metadata.createdAt}"/>
+                                    </StackPanel>
                                 </StackPanel>
-
-                            </StackPanel>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

@@ -4,12 +4,13 @@ using System.Windows.Input;
 using VirtualHerbarium.AdminPanel.Models;
 using VirtualHerbarium.AdminPanel.Services;
 using VirtualHerbarium.AdminPanel.Views;
+using CommunityToolkit.Mvvm.Input;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public class HerbariumDetailsViewModel
     {
-        private readonly PlantsService _plantsService = new PlantsService();
+        private readonly PlantsService _plantsService = PlantsService.Instance;
 
         public HerbariumDetailsResponse Details { get; }
         public ObservableCollection<PlantResponse> Plants { get; }
@@ -38,13 +39,14 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             if (!result.Success || result.Data == null)
             {
-                MessageBox.Show(AppResources.Error_Server);
+                MessageBox.Show(AppResources.Error_Server,
+                    "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             var window = new PlantDetailsView
             {
-                DataContext = new PlantDetailsViewModel(result.Data, _plantsService)
+                DataContext = new PlantDetailsViewModel(result.Data)
             };
 
             window.Show();

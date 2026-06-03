@@ -1,36 +1,30 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Threading.Tasks;
-using System.Windows;
 using VirtualHerbarium.AdminPanel.Models;
 using VirtualHerbarium.AdminPanel.Services;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
-    public class StatsViewModel : INotifyPropertyChanged
+    public partial class StatsViewModel : ObservableObject
     {
-        private readonly StatsService _service = new StatsService();
+        [ObservableProperty] private int totalUsers;
+        [ObservableProperty] private int activeUsers;
+        [ObservableProperty] private int inactiveUsers;
+        [ObservableProperty] private int verifiedUsers;
+        [ObservableProperty] private int unverifiedUsers;
+        [ObservableProperty] private int admins;
 
-        private int _users;
-        public int Users
-        {
-            get => _users;
-            set { _users = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty] private int totalHerbaria;
+        [ObservableProperty] private int publicHerbaria;
+        [ObservableProperty] private int privateHerbaria;
 
-        private int _plants;
-        public int Plants
-        {
-            get => _plants;
-            set { _plants = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty] private int totalPlants;
+        [ObservableProperty] private int recognizedPlants;
+        [ObservableProperty] private int unrecognizedPlants;
+        [ObservableProperty] private int totalPhotos;
 
-        private int _collections;
-        public int Collections
-        {
-            get => _collections;
-            set { _collections = value; OnPropertyChanged(); }
-        }
+        [ObservableProperty] private int totalFriendships;
+        [ObservableProperty] private int pendingRequests;
 
         public StatsViewModel()
         {
@@ -39,19 +33,34 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         private async void LoadStats()
         {
-
-            var result = await _service.GetStatsAsync();
+            var result = await StatsService.Instance.GetOverviewAsync();
 
             if (!result.Success || result.Data == null)
                 return;
 
-            Users = result.Data.users;
-            Plants = result.Data.plants;
-            Collections = result.Data.collections;
-        }
+            var u = result.Data.users;
+            var h = result.Data.herbaria;
+            var p = result.Data.plants;
+            var f = result.Data.friendships;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            TotalUsers = u.totalUsers;
+            ActiveUsers = u.activeUsers;
+            InactiveUsers = u.inactiveUsers;
+            VerifiedUsers = u.verifiedUsers;
+            UnverifiedUsers = u.unverifiedUsers;
+            Admins = u.admins;
+
+            TotalHerbaria = h.totalHerbaria;
+            PublicHerbaria = h.publicHerbaria;
+            PrivateHerbaria = h.privateHerbaria;
+
+            TotalPlants = p.totalPlants;
+            RecognizedPlants = p.recognizedPlants;
+            UnrecognizedPlants = p.unrecognizedPlants;
+            TotalPhotos = p.totalPhotos;
+
+            TotalFriendships = f.totalFriendships;
+            PendingRequests = f.pendingRequests;
+        }
     }
 }

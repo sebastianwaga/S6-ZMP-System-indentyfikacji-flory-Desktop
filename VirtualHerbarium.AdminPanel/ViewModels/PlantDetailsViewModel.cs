@@ -1,25 +1,24 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using VirtualHerbarium.AdminPanel.Models;
 using VirtualHerbarium.AdminPanel.Services;
 
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
-    public class PlantDetailsViewModel : INotifyPropertyChanged
+    public partial class PlantDetailsViewModel : ObservableObject
     {
-        private readonly PlantsService _service;
-
         public PlantDetailsResponse Plant { get; }
-        public ObservableCollection<PlantPhotoResponse> Photos { get; }
+        public ObservableCollection<PhotoViewModel> Photos { get; }
 
-        public PlantDetailsViewModel(PlantDetailsResponse plant, PlantsService service)
+        public PlantDetailsViewModel(PlantDetailsResponse plant)
         {
-            _service = service;
             Plant = plant;
-            Photos = new ObservableCollection<PlantPhotoResponse>(plant.photos);
+
+            Photos = new ObservableCollection<PhotoViewModel>(
+                plant.photos.Select(p => new PhotoViewModel(p))
+            );
 
             _ = LoadPhotos();
         }
@@ -28,20 +27,19 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         {
             foreach (var p in Photos)
             {
-                var meta = await _service.GetPhotoMetadataAsync(Plant.herbariumId, Plant.id, p.id);
+                var meta = await PlantsService.Instance.GetPhotoMetadataAsync(
+                    Plant.herbariumId,
+                    Plant.id,
+                    p.Metadata.id
+                );
 
-                if (meta == null)
-                    continue;
+                if (meta != null)
+                    p.Metadata.url = meta.url;
 
-                p.Image = await _service.LoadPhotoAsync(meta.url);
+                await p.LoadAsync();
             }
 
             OnPropertyChanged(nameof(Photos));
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

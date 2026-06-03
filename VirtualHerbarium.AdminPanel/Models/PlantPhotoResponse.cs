@@ -10,7 +10,5 @@ namespace VirtualHerbarium.AdminPanel.Models
         public string description { get; set; }
         public double confidence { get; set; }
         public DateTime createdAt { get; set; }
-
-        public BitmapImage Image { get; set; }
     }
 }

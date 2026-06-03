@@ -12,7 +12,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public class PlantsViewModel : INotifyPropertyChanged
     {
-        private readonly PlantsService _service = new PlantsService();
+        private readonly PlantsService _service = PlantsService.Instance;
 
         public ObservableCollection<PlantResponse> Plants { get; set; }
 
@@ -96,7 +96,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             var window = new PlantDetailsView
             {
-                DataContext = new PlantDetailsViewModel(result.Data, _service)
+                DataContext = new PlantDetailsViewModel(result.Data)
             };
 
             window.Show();

@@ -12,10 +12,13 @@ namespace VirtualHerbarium.AdminPanel.Services
 {
     public class PlantsService
     {
+        public static PlantsService Instance { get; } = new PlantsService();
+
         private readonly HttpClient _http;
 
-        public PlantsService()
+        private PlantsService()
         {
+
             _http = new HttpClient
             {
                 BaseAddress = new Uri("https://ezielnik-production.up.railway.app")
@@ -49,38 +52,29 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                if (!relativeUrl.StartsWith("http"))
-                {
-                    relativeUrl = relativeUrl.TrimStart('/');
-                    relativeUrl = $"{_http.BaseAddress}{relativeUrl}";
-                }
+                var clean = relativeUrl.TrimStart('/');
+                var url = $"{_http.BaseAddress}{clean}";
 
-                var request = new HttpRequestMessage(HttpMethod.Get, relativeUrl);
-                request.Headers.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
-
-                var response = await _http.SendAsync(request);
+                var response = await _http.GetAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                     return null;
 
                 var bytes = await response.Content.ReadAsByteArrayAsync();
-
                 if (bytes.Length == 0)
                     return null;
 
+                using var ms = new MemoryStream(bytes);
                 var image = new BitmapImage();
-                using (var ms = new MemoryStream(bytes))
-                {
-                    image.BeginInit();
-                    image.CacheOption = BitmapCacheOption.OnLoad;
-                    image.StreamSource = ms;
-                    image.EndInit();
-                }
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = ms;
+                image.EndInit();
+                image.Freeze();
 
                 return image;
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }
