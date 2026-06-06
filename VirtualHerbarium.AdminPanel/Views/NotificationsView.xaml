@@ -12,11 +12,11 @@
 
 		<StackPanel Orientation="Horizontal" Margin="0 0 10 0">
 
-			<Button Content="Odśwież"
+            <Button Content="{DynamicResource Notifications_Refresh}"
                     Width="150"
                     Command="{Binding RefreshCommand}"/>
 
-			<Button Content="Oznacz wszystkie jako przeczytane"
+            <Button Content="{DynamicResource Notifications_MarkAll}"
                     Width="250"
                     Command="{Binding MarkAllCommand}"/>
 		</StackPanel>
@@ -46,7 +46,7 @@
                                            FontStyle="Italic"
                                            Foreground="Gray"/>
 
-								<Button Content="Oznacz jako przeczytane"
+                                <Button Content="{DynamicResource Notifications_MarkRead}"
                                         Width="200"
                                         Margin="0 10 0 0"
                                         Command="{Binding DataContext.MarkReadCommand,

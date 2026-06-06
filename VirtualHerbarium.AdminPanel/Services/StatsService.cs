@@ -10,27 +10,25 @@ namespace VirtualHerbarium.AdminPanel.Services
     {
         public static StatsService Instance { get; } = new StatsService();
 
-        private readonly HttpClient _http;
-
-        private StatsService()
-        {
-            _http = new HttpClient
-            {
-                BaseAddress = new Uri("https://ezielnik-production.up.railway.app")
-            };
-
-            if (!string.IsNullOrEmpty(AuthService.Instance.Token))
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
-            }
-        }
+        private StatsService() { }
 
         public async Task<ApiResult<StatsOverviewResponse>> GetOverviewAsync()
         {
             try
             {
-                var response = await _http.GetAsync("/stats/overview");
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync("stats/overview")
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<StatsOverviewResponse>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
 
                 if (!response.IsSuccessStatusCode)
                 {

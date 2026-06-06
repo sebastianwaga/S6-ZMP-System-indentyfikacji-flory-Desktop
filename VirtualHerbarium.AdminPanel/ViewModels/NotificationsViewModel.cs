@@ -11,7 +11,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public class NotificationsViewModel : INotifyPropertyChanged
     {
-        private readonly NotificationsService _service = new NotificationsService();
+        private readonly NotificationsService _service = NotificationsService.Instance;
 
         public ObservableCollection<NotificationResponse> Notifications { get; set; }
             = new ObservableCollection<NotificationResponse>();

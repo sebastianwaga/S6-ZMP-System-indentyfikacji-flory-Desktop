@@ -1,5 +1,4 @@
 ﻿using System.Windows.Controls;
-using VirtualHerbarium.AdminPanel.ViewModels;
 
 namespace VirtualHerbarium.AdminPanel.Views
 {
@@ -8,7 +7,6 @@ namespace VirtualHerbarium.AdminPanel.Views
         public CollectionsView()
         {
             InitializeComponent();
-            DataContext = new CollectionsViewModel();
         }
     }
 }

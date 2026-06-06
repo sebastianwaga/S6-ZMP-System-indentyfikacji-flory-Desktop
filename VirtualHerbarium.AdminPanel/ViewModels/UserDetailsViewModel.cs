@@ -11,13 +11,13 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             Data = data;
         }
 
-        public string UsernameDisplay => $"Użytkownik: {Data.username}";
+        public string UsernameDisplay => $"User: {Data.username}";
         public string EmailDisplay => $"Email: {Data.email}";
-        public string CreatedDisplay => $"Utworzono: {Data.createdAt}";
-        public string UpdatedDisplay => $"Zaktualizowano: {Data.updatedAt}";
+        public string CreatedDisplay => $"Created: {Data.createdAt}";
+        public string UpdatedDisplay => $"Updated: {Data.updatedAt}";
 
         public string StatsDisplay =>
-            $"Zielników: {Data.herbariumCount}, Roślin: {Data.plantCount}, Zdjęć: {Data.photoCount}, Znajomych: {Data.friendCount}";
+            $"Herbaria: {Data.herbariumCount}, Plants: {Data.plantCount}, Photos: {Data.photoCount}, Friends: {Data.friendCount}";
 
         public object Herbaria => Data.herbaria;
     }

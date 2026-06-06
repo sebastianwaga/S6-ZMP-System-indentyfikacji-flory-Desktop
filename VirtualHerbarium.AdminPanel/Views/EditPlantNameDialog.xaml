@@ -1,0 +1,25 @@
+﻿<Window x:Class="VirtualHerbarium.AdminPanel.Views.EditPlantNameDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource EditPlant_Title}"
+        Height="180" Width="350"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="{DynamicResource EditPlant_NewName}"/>
+            <TextBox x:Name="NameBox" Margin="0 5 0 10"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="{DynamicResource EditPlant_Cancel}" Width="80" Margin="0 0 10 0" Click="Cancel_Click"/>
+            <Button Content="{DynamicResource EditPlant_Save}" Width="80" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

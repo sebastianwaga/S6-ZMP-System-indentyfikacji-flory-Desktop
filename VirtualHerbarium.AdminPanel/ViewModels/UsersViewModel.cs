@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -8,14 +9,14 @@ using VirtualHerbarium.AdminPanel.Models;
 using VirtualHerbarium.AdminPanel.Services;
 using VirtualHerbarium.AdminPanel.Views;
 
-
 namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public class UsersViewModel : INotifyPropertyChanged
     {
-        private readonly UsersService _service;
+        private readonly UsersService _service = UsersService.Instance;
 
-        public ObservableCollection<AdminUserResponse> Users { get; set; }
+        public ObservableCollection<AdminUserResponse> Users { get; private set; }
+            = new ObservableCollection<AdminUserResponse>();
 
         public ICommand BanCommand { get; }
         public ICommand UnbanCommand { get; }
@@ -24,6 +25,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         public ICommand WarningCommand { get; }
         public ICommand ShowDetailsCommand { get; }
         public ICommand ShowFriendsCommand { get; }
+        public ICommand DeleteUserCommand { get; }
 
         private bool _isBusy;
         public bool IsBusy
@@ -34,38 +36,53 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         public UsersViewModel()
         {
-            _service = new UsersService();
-            Users = new ObservableCollection<AdminUserResponse>();
 
-            BanCommand = new RelayCommand<AdminUserResponse>(async u => await BanUser(u));
-            UnbanCommand = new RelayCommand<AdminUserResponse>(async u => await UnbanUser(u));
-            MakeAdminCommand = new RelayCommand<AdminUserResponse>(async u => await MakeAdmin(u));
-            RemoveAdminCommand = new RelayCommand<AdminUserResponse>(async u => await RemoveAdmin(u));
-            WarningCommand = new RelayCommand<AdminUserResponse>(async u => await SendWarning(u));
+            BanCommand = new AsyncRelayCommand<AdminUserResponse>(BanUser);
+            UnbanCommand = new AsyncRelayCommand<AdminUserResponse>(UnbanUser);
+            MakeAdminCommand = new AsyncRelayCommand<AdminUserResponse>(MakeAdmin);
+            RemoveAdminCommand = new AsyncRelayCommand<AdminUserResponse>(RemoveAdmin);
+            WarningCommand = new AsyncRelayCommand<AdminUserResponse>(SendWarning);
+            ShowDetailsCommand = new AsyncRelayCommand<AdminUserResponse>(ShowDetails);
+            ShowFriendsCommand = new AsyncRelayCommand<AdminUserResponse>(ShowFriends);
+            DeleteUserCommand = new AsyncRelayCommand<AdminUserResponse>(DeleteUser);
 
-            ShowDetailsCommand = new RelayCommand<AdminUserResponse>(async u => await ShowDetails(u));
-            ShowFriendsCommand = new RelayCommand<AdminUserResponse>(async u => await ShowFriends(u));
-
-            LoadUsers();
+            _ = InitializeAsync();
         }
 
-        private async void LoadUsers()
+        private async Task InitializeAsync()
+        {
+            await LoadUsers();
+        }
+
+        private async Task LoadUsers()
         {
             IsBusy = true;
 
-            var result = await _service.GetUsersAsync();
-
-            if (!result.Success || result.Data == null)
+            try
             {
-                ShowError(result.StatusCode, result.Error);
-                IsBusy = false;
-                return;
+                var result = await _service.GetUsersAsync();
+
+                if (!result.Success || result.Data == null)
+                {
+                    ShowError(result.StatusCode, result.Error);
+                    return;
+                }
+
+                Users.Clear();
+                foreach (var u in result.Data)
+                    Users.Add(u);
+
+                OnPropertyChanged(nameof(Users));
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while loading users:\n" + ex.Message);
 
-            Users = new ObservableCollection<AdminUserResponse>(result.Data);
-            OnPropertyChanged(nameof(Users));
-
-            IsBusy = false;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private async Task BanUser(AdminUserResponse user)
@@ -159,9 +176,10 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         private async Task SendWarning(AdminUserResponse user)
         {
             var input = Microsoft.VisualBasic.Interaction.InputBox(
-                "Wpisz treść ostrzeżenia:",
-                "Wyślij ostrzeżenie",
-                "Uwaga! Naruszenie regulaminu.");
+            "Enter warning message:",
+            "Send warning",
+            "Warning! Terms violation.");
+
 
             if (string.IsNullOrWhiteSpace(input))
                 return;
@@ -183,7 +201,6 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             IsBusy = false;
         }
 
-
         private async Task ShowDetails(AdminUserResponse user)
         {
             IsBusy = true;
@@ -196,6 +213,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
                 IsBusy = false;
                 return;
             }
+
             IsBusy = false;
 
             var window = new UserDetailsView
@@ -204,9 +222,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             };
 
             window.ShowDialog();
-
         }
-
 
         private async Task ShowFriends(AdminUserResponse user)
         {
@@ -220,6 +236,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
                 IsBusy = false;
                 return;
             }
+
             IsBusy = false;
 
             var window = new UserFriendsView
@@ -228,7 +245,38 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             };
 
             window.ShowDialog();
+        }
 
+        private async Task DeleteUser(AdminUserResponse user)
+        {
+            var confirm = MessageBox.Show(
+            $"Are you sure you want to permanently delete user {user.username}?\nThis action is irreversible.",
+            "Delete confirmation",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            IsBusy = true;
+
+            var result = await _service.DeleteUserAsync(user.id);
+
+            if (!result.Success)
+            {
+                ShowError(result.StatusCode, result.Error);
+                IsBusy = false;
+                return;
+            }
+
+            Users.Remove(user);
+
+            MessageBox.Show("User has been permanently deleted.",
+                "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+
+            IsBusy = false;
         }
 
         private void ShowError(int code, string? error)
@@ -256,13 +304,13 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
-    public class RelayCommand<T> : ICommand
+    public class AsyncRelayCommand<T> : ICommand
     {
         private readonly Func<T, Task> _execute;
 
-        public RelayCommand(Func<T, Task> execute) => _execute = execute;
+        public AsyncRelayCommand(Func<T, Task> execute) => _execute = execute;
 
-        public bool CanExecute(object? parameter) => true;
+        public bool CanExecute(object? parameter) => parameter is T;
 
         public async void Execute(object? parameter)
         {

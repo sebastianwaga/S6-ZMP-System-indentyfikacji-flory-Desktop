@@ -27,6 +27,12 @@ namespace VirtualHerbarium.AdminPanel.Helpers
                     langDict.Source = new Uri("Localization/Strings.pl.xaml", UriKind.Relative);
                     break;
             }
+
+            foreach (Window window in Application.Current.Windows)
+            {
+                window.Language = System.Windows.Markup.XmlLanguage.GetLanguage(lang);
+            }
         }
+
     }
 }

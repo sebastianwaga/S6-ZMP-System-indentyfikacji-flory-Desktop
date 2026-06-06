@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using VirtualHerbarium.AdminPanel.Helpers;
@@ -11,28 +11,62 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
+        public static MainViewModel Instance { get; } = new MainViewModel();
+
         [ObservableProperty]
         private object? currentView;
 
-        [ObservableProperty]
         private string? selectedMenu;
+        public string? SelectedMenu
+        {
+            get => selectedMenu;
+            set
+            {
+                SetProperty(ref selectedMenu, value);
+                RefreshCurrentView();
+            }
+        }
+
+        private bool isOnline = true;
+        public bool IsOnline
+        {
+            get => isOnline;
+            private set
+            {
+                if (SetProperty(ref isOnline, value))
+                {
+                    OnPropertyChanged(nameof(IsOffline));
+                }
+            }
+        }
+
+        public bool IsOffline => !IsOnline;
 
         public ICommand ChangeLanguageCommand { get; }
         public ICommand LogoutCommand { get; }
 
-        public MainViewModel()
+        private MainViewModel()
         {
             ChangeLanguageCommand = new RelayCommand<string>(ChangeLanguage);
             LogoutCommand = new RelayCommand(Logout);
 
             CurrentView = new PlaceholderViewModel(AppResources.Placeholder_SelectOption);
+
+            InternetService.Instance.InternetStatusChanged += status =>
+            {
+                IsOnline = status;
+            };
+
+            _ = InternetService.Instance.ForceCheck();
         }
 
-        private Task ChangeLanguage(string lang)
+        private void ChangeLanguage(string lang)
         {
             LanguageManager.SetLanguage(lang);
-            RefreshCurrentView();
-            return Task.CompletedTask;
+
+            var temp = SelectedMenu;
+            SelectedMenu = null;
+            SelectedMenu = temp;
         }
 
         private void RefreshCurrentView()
@@ -40,23 +74,23 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             switch (SelectedMenu)
             {
                 case "Users":
-                    CurrentView = new UsersView();
+                    CurrentView = new UsersView { DataContext = new UsersViewModel() };
                     break;
 
                 case "Plants":
-                    CurrentView = new PlantsView();
+                    CurrentView = new PlantsView { DataContext = new PlantsViewModel() };
                     break;
 
                 case "Collections":
-                    CurrentView = new CollectionsView();
+                    CurrentView = new CollectionsView { DataContext = new CollectionsViewModel() };
                     break;
 
                 case "Notifications":
-                    CurrentView = new NotificationsView();
+                    CurrentView = new NotificationsView { DataContext = new NotificationsViewModel() };
                     break;
 
                 case "Stats":
-                    CurrentView = new StatsView();
+                    CurrentView = new StatsView { DataContext = new StatsViewModel() };
                     break;
 
                 default:
@@ -74,14 +108,6 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
                 .FirstOrDefault();
 
             main?.Close();
-
-            new LoginView().Show();
-        }
-
-
-        partial void OnSelectedMenuChanged(string? value)
-        {
-            RefreshCurrentView();
         }
     }
 

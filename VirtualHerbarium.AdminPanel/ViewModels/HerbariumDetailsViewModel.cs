@@ -26,12 +26,12 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             ShowPlantDetailsCommand = new RelayCommand<PlantResponse>(async p => await ShowPlantDetails(p));
         }
 
-        public string NameDisplay => $"Nazwa: {Details.name}";
-        public string DescriptionDisplay => $"Opis: {Details.description}";
-        public string CreatedDisplay => $"Utworzono: {Details.createdAt}";
-        public string UpdatedDisplay => $"Zaktualizowano: {Details.updatedAt}";
-        public string PublicDisplay => Details.@public ? "Publiczny" : "Prywatny";
-        public string PlantCountDisplay => $"Roślin: {Details.plantCount}";
+        public string NameDisplay => $"Name: {Details.name}";
+        public string DescriptionDisplay => $"Description: {Details.description}";
+        public string CreatedDisplay => $"Created: {Details.createdAt}";
+        public string UpdatedDisplay => $"Updated: {Details.updatedAt}";
+        public string PublicDisplay => Details.@public ? "Public" : "Private";
+        public string PlantCountDisplay => $"Plants: {Details.plantCount}";
 
         private async Task ShowPlantDetails(PlantResponse plant)
         {
@@ -40,7 +40,8 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             if (!result.Success || result.Data == null)
             {
                 MessageBox.Show(AppResources.Error_Server,
-                    "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
                 return;
             }
 

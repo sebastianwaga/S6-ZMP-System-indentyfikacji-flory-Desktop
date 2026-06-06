@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using VirtualHerbarium.AdminPanel.ViewModels;
 
@@ -21,6 +16,14 @@ namespace VirtualHerbarium.AdminPanel.Views
         {
             if (DataContext is LoginViewModel vm)
                 vm.Password = ((PasswordBox)sender).Password;
+        }
+
+        public void OnLoginSuccess()
+        {
+            var main = new MainWindow();
+            main.Show();
+
+            Close();
         }
     }
 }

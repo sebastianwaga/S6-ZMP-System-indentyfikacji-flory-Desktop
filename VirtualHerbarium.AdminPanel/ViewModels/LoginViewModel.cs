@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using System;
+using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,7 +15,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
     public class LoginViewModel : INotifyPropertyChanged
     {
         private readonly AuthService _auth = AuthService.Instance;
-        private readonly Window _window;
+        private readonly LoginView _window;
 
         private bool _isBusy;
         public bool IsBusy
@@ -45,18 +48,21 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
         public ICommand LoginCommand { get; }
         public ICommand ChangeLanguageCommand { get; }
 
-        public LoginViewModel(Window window)
+        public LoginViewModel(LoginView window)
         {
             _window = window;
 
-            LoginCommand = new AsyncCommand(LoginAsync);
+            LoginCommand = new RelayCommand(
+            async () => await LoginAsync(),
+            () => !IsBusy
+            );
+
             ChangeLanguageCommand = new RelayCommand<string>(ChangeLanguage);
         }
 
-        private Task ChangeLanguage(string lang)
+        private void ChangeLanguage(string lang)
         {
             LanguageManager.SetLanguage(lang);
-            return Task.CompletedTask;
         }
 
         private async Task LoginAsync()
@@ -71,14 +77,14 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             if (result?.message == "LOCKED")
             {
-                ErrorMessage = "Zbyt wiele nieudanych prób. Spróbuj ponownie za 10 sekund.";
+                ErrorMessage = "Too many failed attempts. Try again in 10 seconds.";
                 IsBusy = false;
                 return;
             }
 
             if (result?.message == "NETWORK_ERROR")
             {
-                ErrorMessage = "Brak połączenia z serwerem.";
+                ErrorMessage = "No connection to the server.";
                 IsBusy = false;
                 return;
             }
@@ -97,9 +103,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
                 return;
             }
 
-            var main = new MainWindow();
-            main.Show();
-            _window.Close();
+            _window.OnLoginSuccess();
 
             IsBusy = false;
         }

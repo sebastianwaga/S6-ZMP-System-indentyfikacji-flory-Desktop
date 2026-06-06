@@ -8,7 +8,6 @@ namespace VirtualHerbarium.AdminPanel.Views
         public NotificationsView()
         {
             InitializeComponent();
-            DataContext = new NotificationsViewModel();
         }
     }
 }

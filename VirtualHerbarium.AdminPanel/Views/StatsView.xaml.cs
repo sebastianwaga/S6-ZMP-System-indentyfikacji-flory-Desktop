@@ -14,7 +14,6 @@ namespace VirtualHerbarium.AdminPanel.Views
         public StatsView()
         {
             InitializeComponent();
-            DataContext = new StatsViewModel();
         }
     }
 }

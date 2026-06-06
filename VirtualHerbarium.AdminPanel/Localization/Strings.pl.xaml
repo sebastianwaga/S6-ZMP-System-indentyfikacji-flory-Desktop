@@ -88,4 +88,117 @@
     <sys:String x:Key="Success_Title">Sukces</sys:String>
     <sys:String x:Key="Confirm_Title">Potwierdzenie</sys:String>
 
+    <sys:String x:Key="Users_Action_Details">Szczegóły</sys:String>
+    <sys:String x:Key="Users_Action_Friends">Znajomi</sys:String>
+    <sys:String x:Key="Users_Action_Delete">Usuń</sys:String>
+
+    <sys:String x:Key="UserFriends_Title">Znajomi użytkownika</sys:String>
+    <sys:String x:Key="UserFriends_Accepted">Zaakceptowani:</sys:String>
+    <sys:String x:Key="UserFriends_Incoming">Oczekujące:</sys:String>
+    <sys:String x:Key="UserFriends_Sent">Wysłane:</sys:String>
+
+    <sys:String x:Key="UserDetails_Title">Szczegóły użytkownika</sys:String>
+    <sys:String x:Key="UserDetails_Herbaria">Zielniki:</sys:String>
+    <sys:String x:Key="UserDetails_PlantsCount">Roślin: {0}</sys:String>
+
+    <sys:String x:Key="Stats_Title">Statystyki systemu</sys:String>
+
+    <sys:String x:Key="Stats_Users">Użytkownicy</sys:String>
+    <sys:String x:Key="Stats_Users_All">Wszyscy</sys:String>
+    <sys:String x:Key="Stats_Users_Active">Aktywni</sys:String>
+    <sys:String x:Key="Stats_Users_Inactive">Nieaktywni</sys:String>
+    <sys:String x:Key="Stats_Users_Verified">Zweryfikowani</sys:String>
+    <sys:String x:Key="Stats_Users_Unverified">Niezweryfikowani</sys:String>
+    <sys:String x:Key="Stats_Users_Admins">Administratorzy</sys:String>
+
+    <sys:String x:Key="Stats_Herbaria">Zielniki</sys:String>
+    <sys:String x:Key="Stats_Herbaria_All">Wszystkie</sys:String>
+    <sys:String x:Key="Stats_Herbaria_Public">Publiczne</sys:String>
+    <sys:String x:Key="Stats_Herbaria_Private">Prywatne</sys:String>
+
+    <sys:String x:Key="Stats_Plants">Rośliny</sys:String>
+    <sys:String x:Key="Stats_Plants_All">Wszystkie</sys:String>
+    <sys:String x:Key="Stats_Plants_Recognized">Rozpoznane</sys:String>
+    <sys:String x:Key="Stats_Plants_Unrecognized">Nierozpoznane</sys:String>
+    <sys:String x:Key="Stats_Plants_Photos">Zdjęcia</sys:String>
+
+    <sys:String x:Key="Stats_Friendships">Znajomości</sys:String>
+    <sys:String x:Key="Stats_Friendships_All">Znajomości</sys:String>
+    <sys:String x:Key="Stats_Friendships_Pending">Oczekujące</sys:String>
+
+    <sys:String x:Key="Plants_Add">Dodaj roślinę</sys:String>
+    
+    <sys:String x:Key="Plants_Action_Details">Szczegóły</sys:String>
+    <sys:String x:Key="Plants_Action_Edit">Edytuj</sys:String>
+
+    <sys:String x:Key="PlantDetails_Title">Szczegóły rośliny</sys:String>
+    <sys:String x:Key="PlantDetails_Photos">Zdjęcia</sys:String>
+
+    <sys:String x:Key="PlantDetails_EditDescription">Edytuj opis</sys:String>
+    <sys:String x:Key="PlantDetails_Move">Przenieś</sys:String>
+    <sys:String x:Key="PlantDetails_Delete">Usuń</sys:String>
+
+    <sys:String x:Key="MovePhoto_Title">Przenieś zdjęcie</sys:String>
+    <sys:String x:Key="MovePhoto_SelectTarget">Wybierz roślinę docelową:</sys:String>
+    <sys:String x:Key="MovePhoto_Cancel">Anuluj</sys:String>
+    <sys:String x:Key="MovePhoto_Move">Przenieś</sys:String>
+
+    <sys:String x:Key="Notifications_Refresh">Odśwież</sys:String>
+    <sys:String x:Key="Notifications_MarkAll">Oznacz wszystkie jako przeczytane</sys:String>
+    <sys:String x:Key="Notifications_MarkRead">Oznacz jako przeczytane</sys:String>
+
+    <sys:String x:Key="Main_Offline">Brak połączenia z internetem — tryb offline</sys:String>
+    <sys:String x:Key="Main_Logout">Wyloguj</sys:String>
+
+    <sys:String x:Key="HerbariumDetails_Title">Szczegóły zielnika</sys:String>
+    <sys:String x:Key="HerbariumDetails_Plants">Rośliny:</sys:String>
+    <sys:String x:Key="HerbariumDetails_Action_Details">Szczegóły</sys:String>
+
+    <sys:String x:Key="EditPlant_Title">Edytuj nazwę</sys:String>
+    <sys:String x:Key="EditPlant_NewName">Nowa nazwa:</sys:String>
+    <sys:String x:Key="EditPlant_Cancel">Anuluj</sys:String>
+    <sys:String x:Key="EditPlant_Save">Zapisz</sys:String>
+
+    <sys:String x:Key="HerbariumDialog_Title">Zielnik</sys:String>
+    <sys:String x:Key="HerbariumDialog_Name">Nazwa:</sys:String>
+    <sys:String x:Key="HerbariumDialog_Description">Opis:</sys:String>
+    <sys:String x:Key="HerbariumDialog_Public">Publiczny</sys:String>
+    <sys:String x:Key="HerbariumDialog_Cancel">Anuluj</sys:String>
+    <sys:String x:Key="HerbariumDialog_Save">Zapisz</sys:String>
+
+    <sys:String x:Key="Collections_Add">Utwórz zielnik</sys:String>
+
+    <sys:String x:Key="Collections_Action_Details">Szczegóły</sys:String>
+    <sys:String x:Key="Collections_Action_Edit">Edytuj</sys:String>
+
+    <sys:String x:Key="AddPlant_Title">Dodaj roślinę</sys:String>
+    <sys:String x:Key="AddPlant_Name">Nazwa rośliny:</sys:String>
+    <sys:String x:Key="AddPlant_Photo">Zdjęcie:</sys:String>
+    <sys:String x:Key="AddPlant_Choose">Wybierz</sys:String>
+    <sys:String x:Key="AddPlant_HerbariumId">ID zielnika:</sys:String>
+    <sys:String x:Key="AddPlant_Cancel">Anuluj</sys:String>
+    <sys:String x:Key="AddPlant_Add">Dodaj</sys:String>
+
+    <sys:String x:Key="Error_LoadUsers">Błąd podczas ładowania użytkowników:</sys:String>
+
+    <sys:String x:Key="Warning_Input_Title">Wyślij ostrzeżenie</sys:String>
+    <sys:String x:Key="Warning_Input_Prompt">Wpisz treść ostrzeżenia:</sys:String>
+    <sys:String x:Key="Warning_Input_Default">Uwaga! Naruszenie regulaminu.</sys:String>
+
+    <sys:String x:Key="Error_WarningFailed">Nie udało się wysłać ostrzeżenia.</sys:String>
+
+    <sys:String x:Key="Confirm_DeleteUser">Czy na pewno chcesz trwale usunąć użytkownika {0}?\nTa operacja jest nieodwracalna.</sys:String>
+    <sys:String x:Key="DeleteUser_Title">Potwierdzenie usunięcia</sys:String>
+    <sys:String x:Key="DeleteUser_Success">Użytkownik został trwale usunięty.</sys:String>
+
+    <sys:String x:Key="UserDetails_Username">Użytkownik: {0}</sys:String>
+    <sys:String x:Key="UserDetails_Email">Email: {0}</sys:String>
+    <sys:String x:Key="UserDetails_Created">Utworzono: {0}</sys:String>
+    <sys:String x:Key="UserDetails_Updated">Zaktualizowano: {0}</sys:String>
+
+    <sys:String x:Key="UserDetails_Stats">
+        Zielników: {0}, Roślin: {1}, Zdjęć: {2}, Znajomych: {3}
+    </sys:String>
+
+
 </ResourceDictionary>

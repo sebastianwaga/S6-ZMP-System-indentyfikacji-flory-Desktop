@@ -88,4 +88,114 @@
     <sys:String x:Key="Success_Title">Success</sys:String>
     <sys:String x:Key="Confirm_Title">Confirmation</sys:String>
 
+    <sys:String x:Key="Users_Action_Details">Details</sys:String>
+    <sys:String x:Key="Users_Action_Friends">Friends</sys:String>
+    <sys:String x:Key="Users_Action_Delete">Delete</sys:String>
+
+    <sys:String x:Key="UserFriends_Title">User friends</sys:String>
+    <sys:String x:Key="UserFriends_Accepted">Accepted:</sys:String>
+    <sys:String x:Key="UserFriends_Incoming">Incoming:</sys:String>
+    <sys:String x:Key="UserFriends_Sent">Sent:</sys:String>
+
+    <sys:String x:Key="UserDetails_Title">User details</sys:String>
+    <sys:String x:Key="UserDetails_Herbaria">Herbaria:</sys:String>
+    <sys:String x:Key="UserDetails_PlantsCount">Plants: {0}</sys:String>
+
+    <sys:String x:Key="Stats_Title">System statistics</sys:String>
+
+    <sys:String x:Key="Stats_Users">Users</sys:String>
+    <sys:String x:Key="Stats_Users_All">All</sys:String>
+    <sys:String x:Key="Stats_Users_Active">Active</sys:String>
+    <sys:String x:Key="Stats_Users_Inactive">Inactive</sys:String>
+    <sys:String x:Key="Stats_Users_Verified">Verified</sys:String>
+    <sys:String x:Key="Stats_Users_Unverified">Unverified</sys:String>
+    <sys:String x:Key="Stats_Users_Admins">Admins</sys:String>
+
+    <sys:String x:Key="Stats_Herbaria">Collections</sys:String>
+    <sys:String x:Key="Stats_Herbaria_All">All</sys:String>
+    <sys:String x:Key="Stats_Herbaria_Public">Public</sys:String>
+    <sys:String x:Key="Stats_Herbaria_Private">Private</sys:String>
+
+    <sys:String x:Key="Stats_Plants">Plants</sys:String>
+    <sys:String x:Key="Stats_Plants_All">All</sys:String>
+    <sys:String x:Key="Stats_Plants_Recognized">Recognized</sys:String>
+    <sys:String x:Key="Stats_Plants_Unrecognized">Unrecognized</sys:String>
+    <sys:String x:Key="Stats_Plants_Photos">Photos</sys:String>
+
+    <sys:String x:Key="Stats_Friendships">Friendships</sys:String>
+    <sys:String x:Key="Stats_Friendships_All">Friendships</sys:String>
+    <sys:String x:Key="Stats_Friendships_Pending">Pending</sys:String>
+    <sys:String x:Key="Plants_Add">Add plant</sys:String>
+
+    <sys:String x:Key="Plants_Action_Details">Details</sys:String>
+    <sys:String x:Key="Plants_Action_Edit">Edit</sys:String>
+
+    <sys:String x:Key="PlantDetails_Title">Plant details</sys:String>
+    <sys:String x:Key="PlantDetails_Photos">Photos</sys:String>
+
+    <sys:String x:Key="PlantDetails_EditDescription">Edit description</sys:String>
+    <sys:String x:Key="PlantDetails_Move">Move</sys:String>
+    <sys:String x:Key="PlantDetails_Delete">Delete</sys:String>
+
+    <sys:String x:Key="MovePhoto_Title">Move photo</sys:String>
+    <sys:String x:Key="MovePhoto_SelectTarget">Select target plant:</sys:String>
+    <sys:String x:Key="MovePhoto_Cancel">Cancel</sys:String>
+    <sys:String x:Key="MovePhoto_Move">Move</sys:String>
+
+    <sys:String x:Key="Notifications_Refresh">Refresh</sys:String>
+    <sys:String x:Key="Notifications_MarkAll">Mark all as read</sys:String>
+    <sys:String x:Key="Notifications_MarkRead">Mark as read</sys:String>
+
+    <sys:String x:Key="Main_Offline">No internet connection — offline mode</sys:String>
+    <sys:String x:Key="Main_Logout">Logout</sys:String>
+
+    <sys:String x:Key="HerbariumDetails_Title">Herbarium details</sys:String>
+    <sys:String x:Key="HerbariumDetails_Plants">Plants:</sys:String>
+    <sys:String x:Key="HerbariumDetails_Action_Details">Details</sys:String>
+
+    <sys:String x:Key="EditPlant_Title">Edit name</sys:String>
+    <sys:String x:Key="EditPlant_NewName">New name:</sys:String>
+    <sys:String x:Key="EditPlant_Cancel">Cancel</sys:String>
+    <sys:String x:Key="EditPlant_Save">Save</sys:String>
+
+    <sys:String x:Key="HerbariumDialog_Title">Herbarium</sys:String>
+    <sys:String x:Key="HerbariumDialog_Name">Name:</sys:String>
+    <sys:String x:Key="HerbariumDialog_Description">Description:</sys:String>
+    <sys:String x:Key="HerbariumDialog_Public">Public</sys:String>
+    <sys:String x:Key="HerbariumDialog_Cancel">Cancel</sys:String>
+    <sys:String x:Key="HerbariumDialog_Save">Save</sys:String>
+
+    <sys:String x:Key="Collections_Add">Create herbarium</sys:String>
+    <sys:String x:Key="Collections_Action_Details">Details</sys:String>
+    <sys:String x:Key="Collections_Action_Edit">Edit</sys:String>
+
+    <sys:String x:Key="AddPlant_Title">Add plant</sys:String>
+    <sys:String x:Key="AddPlant_Name">Plant name:</sys:String>
+    <sys:String x:Key="AddPlant_Photo">Photo:</sys:String>
+    <sys:String x:Key="AddPlant_Choose">Choose</sys:String>
+    <sys:String x:Key="AddPlant_HerbariumId">Herbarium ID:</sys:String>
+    <sys:String x:Key="AddPlant_Cancel">Cancel</sys:String>
+    <sys:String x:Key="AddPlant_Add">Add</sys:String>
+
+    <sys:String x:Key="Error_LoadUsers">Error while loading users:</sys:String>
+
+    <sys:String x:Key="Warning_Input_Title">Send warning</sys:String>
+    <sys:String x:Key="Warning_Input_Prompt">Enter warning message:</sys:String>
+    <sys:String x:Key="Warning_Input_Default">Warning! Terms violation.</sys:String>
+
+    <sys:String x:Key="Error_WarningFailed">Failed to send warning.</sys:String>
+
+    <sys:String x:Key="Confirm_DeleteUser">Are you sure you want to permanently delete user {0}?\nThis action is irreversible.</sys:String>
+    <sys:String x:Key="DeleteUser_Title">Delete confirmation</sys:String>
+    <sys:String x:Key="DeleteUser_Success">User has been permanently deleted.</sys:String>
+
+    <sys:String x:Key="UserDetails_Username">User: {0}</sys:String>
+    <sys:String x:Key="UserDetails_Email">Email: {0}</sys:String>
+    <sys:String x:Key="UserDetails_Created">Created: {0}</sys:String>
+    <sys:String x:Key="UserDetails_Updated">Updated: {0}</sys:String>
+
+    <sys:String x:Key="UserDetails_Stats">
+        Herbaria: {0}, Plants: {1}, Photos: {2}, Friends: {3}
+    </sys:String>
+
 </ResourceDictionary>

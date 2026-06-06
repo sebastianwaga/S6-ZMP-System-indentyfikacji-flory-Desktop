@@ -1,22 +1,15 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using VirtualHerbarium.AdminPanel.ViewModels;
 
-namespace VirtualHerbarium.AdminPanel.Views;
-
-public partial class MainWindow : Window
+namespace VirtualHerbarium.AdminPanel.Views
 {
-    public MainWindow()
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        DataContext = new MainViewModel();
+        public MainWindow()
+        {
+            InitializeComponent();
+            DataContext = MainViewModel.Instance;
+
+        }
     }
 }

@@ -17,6 +17,8 @@ namespace VirtualHerbarium.AdminPanel.Services
         public string? Token { get; private set; }
         public LoginResponse? CurrentUser { get; private set; }
 
+        public event Action? SessionExpired;
+
         private int _failedAttempts = 0;
         private bool _isLocked = false;
         private DateTime _lockUntil;
@@ -25,9 +27,13 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             _http = new HttpClient
             {
-                BaseAddress = new Uri("https://ezielnik-production.up.railway.app"),
+                BaseAddress = new Uri("https://ezielnik-production.up.railway.app/"),
                 Timeout = TimeSpan.FromSeconds(10)
             };
+
+            _http.DefaultRequestHeaders.Accept.Clear();
+            _http.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         private string EncryptToken(string token)
@@ -42,6 +48,12 @@ namespace VirtualHerbarium.AdminPanel.Services
             var bytes = Convert.FromBase64String(encrypted);
             var decrypted = ProtectedData.Unprotect(bytes, null, DataProtectionScope.CurrentUser);
             return Encoding.UTF8.GetString(decrypted);
+        }
+
+        public void HandleUnauthorized()
+        {
+            Logout();
+            SessionExpired?.Invoke();
         }
 
         public async Task<LoginResponse?> LoginAsync(string login, string password)
@@ -59,11 +71,17 @@ namespace VirtualHerbarium.AdminPanel.Services
 
             try
             {
-                response = await _http.PostAsJsonAsync("/users/login", request);
+                response = await _http.PostAsJsonAsync("users/login", request);
             }
             catch
             {
                 return new LoginResponse { message = "NETWORK_ERROR" };
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                HandleUnauthorized();
+                return null;
             }
 
             if (!response.IsSuccessStatusCode)
@@ -106,6 +124,26 @@ namespace VirtualHerbarium.AdminPanel.Services
             Token = null;
             CurrentUser = null;
             _http.DefaultRequestHeaders.Authorization = null;
+        }
+
+        public async Task<HttpResponseMessage?> SendAuthorizedAsync(Func<HttpClient, Task<HttpResponseMessage>> action)
+        {
+            try
+            {
+                var response = await action(_http);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    HandleUnauthorized();
+                    return null;
+                }
+
+                return response;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

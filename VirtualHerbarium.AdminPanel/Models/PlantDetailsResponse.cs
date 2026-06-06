@@ -5,11 +5,13 @@
         public string id { get; set; }
         public string herbariumId { get; set; }
         public string name { get; set; }
+
         public string detectedSpecies { get; set; }
         public string speciesId { get; set; }
         public string family { get; set; }
         public string genus { get; set; }
         public string commonNames { get; set; }
+
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
 

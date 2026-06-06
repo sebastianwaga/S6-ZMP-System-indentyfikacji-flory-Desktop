@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -19,6 +20,9 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         public ICommand DeleteCommand { get; }
         public ICommand ShowDetailsCommand { get; }
+        public ICommand CreateCommand { get; }
+        public ICommand EditCommand { get; }
+
 
         private bool _isBusy;
         public bool IsBusy
@@ -34,6 +38,8 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
             DeleteCommand = new RelayCommand<HerbariumStatsResponse>(async h => await DeleteCollection(h));
             ShowDetailsCommand = new RelayCommand<HerbariumStatsResponse>(async h => await ShowDetails(h));
+            CreateCommand = new RelayCommand(async () => await CreateHerbarium());
+            EditCommand = new RelayCommand<HerbariumStatsResponse>(async h => await EditHerbarium(h));
 
             LoadCollections();
         }
@@ -59,11 +65,12 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         private async Task DeleteCollection(HerbariumStatsResponse herbarium)
         {
-            if (MessageBox.Show($"Na pewno usunąć zielnik \"{herbarium.name}\"?",
-                    "Potwierdzenie",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            if (MessageBox.Show($"Delete herbarium \"{herbarium.name}\"?",
+            "Confirmation",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning) != MessageBoxResult.Yes)
                 return;
+
 
             IsBusy = true;
 
@@ -77,7 +84,7 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
             }
 
             Collections.Remove(herbarium);
-            MessageBox.Show("Zielnik został usunięty.",
+            MessageBox.Show("Herbarium has been deleted.",
                 AppResources.Success_Title, MessageBoxButton.OK, MessageBoxImage.Information);
 
             IsBusy = false;
@@ -133,6 +140,75 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
                 Application.Current.Shutdown();
             }
         }
+        private async Task CreateHerbarium()
+        {
+            var vm = new CreateEditHerbariumViewModel("Create herbarium");
+            var window = new CreateEditHerbariumView { DataContext = vm };
+
+            if (window.ShowDialog() != true)
+                return;
+
+            IsBusy = true;
+
+            var result = await _service.CreateHerbariumAsync(vm.Name, vm.Description, vm.IsPublic);
+
+            if (!result.Success || result.Data == null)
+            {
+                ShowError(result.StatusCode, result.Error);
+                IsBusy = false;
+                return;
+            }
+
+            Collections.Add(new HerbariumStatsResponse
+            {
+                id = result.Data.id,
+                name = result.Data.name,
+                ownerId = result.Data.userId,
+                ownerUsername = "You"
+            });
+
+            MessageBox.Show("Herbarium has been created.",
+                AppResources.Success_Title, MessageBoxButton.OK, MessageBoxImage.Information);
+
+            IsBusy = false;
+        }
+        private async Task EditHerbarium(HerbariumStatsResponse herbarium)
+        {
+            var vm = new CreateEditHerbariumViewModel("Edit herbarium");
+            vm.Name = herbarium.name;
+
+            var details = await _service.GetHerbariumDetailsAsync(herbarium.id);
+            if (details.Success && details.Data != null)
+            {
+                vm.Description = details.Data.description;
+                vm.IsPublic = details.Data.@public;
+            }
+
+            var window = new CreateEditHerbariumView { DataContext = vm };
+
+            if (window.ShowDialog() != true)
+                return;
+
+            IsBusy = true;
+
+            var result = await _service.UpdateHerbariumAsync(herbarium.id, vm.Name, vm.Description, vm.IsPublic);
+
+            if (!result.Success)
+            {
+                ShowError(result.StatusCode, result.Error);
+                IsBusy = false;
+                return;
+            }
+
+            herbarium.name = vm.Name;
+            OnPropertyChanged(nameof(Collections));
+
+            MessageBox.Show("Herbarium has been updated.",
+                AppResources.Success_Title, MessageBoxButton.OK, MessageBoxImage.Information);
+
+            IsBusy = false;
+        }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)

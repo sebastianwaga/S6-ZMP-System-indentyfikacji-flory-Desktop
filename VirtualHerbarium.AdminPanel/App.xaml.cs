@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Windows;
 using System.Windows.Threading;
 using VirtualHerbarium.AdminPanel.Services;
 using VirtualHerbarium.AdminPanel.Views;
@@ -7,14 +10,28 @@ namespace VirtualHerbarium.AdminPanel
 {
     public partial class App : Application
     {
-        private DispatcherTimer _idleTimer;
+        private static Mutex? _mutex;
+        private DispatcherTimer? _idleTimer;
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            const string appName = "VirtualHerbarium.AdminPanel.SingleInstance";
+            bool createdNew;
+
+            _mutex = new Mutex(true, appName, out createdNew);
+
+            if (!createdNew)
+            {
+                Shutdown();
+                return;
+            }
+
             base.OnStartup(e);
-            ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            _idleTimer = new DispatcherTimer();
-            _idleTimer.Interval = TimeSpan.FromMinutes(5);
+
+            _idleTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(5)
+            };
             _idleTimer.Tick += IdleTimer_Tick;
             _idleTimer.Start();
 
@@ -32,7 +49,20 @@ namespace VirtualHerbarium.AdminPanel
 
         private void IdleTimer_Tick(object? sender, EventArgs e)
         {
-            _idleTimer.Stop();
+            _idleTimer?.Stop();
+
+            if (Application.Current.Windows.Count == 0)
+            {
+                Application.Current.Shutdown();
+                return;
+            }
+
+            if (Application.Current.Windows.OfType<LoginView>().Any() &&
+                !Application.Current.Windows.OfType<MainWindow>().Any())
+            {
+                _idleTimer?.Start();
+                return;
+            }
 
             AuthService.Instance.Logout();
 
@@ -42,13 +72,27 @@ namespace VirtualHerbarium.AdminPanel
 
             main?.Close();
 
-            new LoginView().Show();
+            if (Application.Current.Windows.Count > 0)
+                new LoginView().Show();
+
+            _idleTimer?.Start();
         }
 
         private void ResetIdleTimer(object sender, RoutedEventArgs e)
         {
-            _idleTimer.Stop();
-            _idleTimer.Start();
+            _idleTimer?.Stop();
+            _idleTimer?.Start();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _idleTimer?.Stop();
+            _idleTimer = null;
+
+            _mutex?.ReleaseMutex();
+            _mutex = null;
+
+            base.OnExit(e);
         }
     }
 }

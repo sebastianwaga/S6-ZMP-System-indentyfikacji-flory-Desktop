@@ -9,22 +9,9 @@ namespace VirtualHerbarium.AdminPanel.Services
 {
     public class UsersService
     {
-        private readonly HttpClient _http;
+        public static UsersService Instance { get; } = new UsersService();
 
-        public UsersService()
-        {
-            _http = new HttpClient
-            {
-                BaseAddress = new Uri("https://ezielnik-production.up.railway.app"),
-                Timeout = TimeSpan.FromSeconds(10)
-            };
-
-            if (AuthService.Instance.Token != null)
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
-            }
-        }
+        private UsersService() { }
 
         private ApiResult<T> HandleError<T>(HttpResponseMessage response)
         {
@@ -48,15 +35,23 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.GetAsync("/users");
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync("stats/users")
+                );
 
-                if (response.IsSuccessStatusCode)
+                if (response == null)
+                    return ApiResult<List<AdminUserResponse>>.Unauthorized();
+
+                if (!response.IsSuccessStatusCode)
+                    return HandleError<List<AdminUserResponse>>(response);
+
+                var data = await response.Content.ReadFromJsonAsync<List<AdminUserResponse>>();
+
+                return new ApiResult<List<AdminUserResponse>>
                 {
-                    var data = await response.Content.ReadFromJsonAsync<List<AdminUserResponse>>();
-                    return new ApiResult<List<AdminUserResponse>> { Success = true, Data = data };
-                }
-
-                return HandleError<List<AdminUserResponse>>(response);
+                    Success = true,
+                    Data = data
+                };
             }
             catch
             {
@@ -67,20 +62,27 @@ namespace VirtualHerbarium.AdminPanel.Services
                 };
             }
         }
-
         public async Task<ApiResult<UserDetailsResponse>> GetUserDetailsAsync(string id)
         {
             try
             {
-                var response = await _http.GetAsync($"/stats/users/{id}");
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync($"stats/users/{id}")
+                );
 
-                if (response.IsSuccessStatusCode)
+                if (response == null)
+                    return ApiResult<UserDetailsResponse>.Unauthorized();
+
+                if (!response.IsSuccessStatusCode)
+                    return HandleError<UserDetailsResponse>(response);
+
+                var data = await response.Content.ReadFromJsonAsync<UserDetailsResponse>();
+
+                return new ApiResult<UserDetailsResponse>
                 {
-                    var data = await response.Content.ReadFromJsonAsync<UserDetailsResponse>();
-                    return new ApiResult<UserDetailsResponse> { Success = true, Data = data };
-                }
-
-                return HandleError<UserDetailsResponse>(response);
+                    Success = true,
+                    Data = data
+                };
             }
             catch
             {
@@ -96,15 +98,23 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.GetAsync($"/stats/users/{id}/friends");
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync($"stats/users/{id}/friends")
+                );
 
-                if (response.IsSuccessStatusCode)
+                if (response == null)
+                    return ApiResult<UserFriendsResponse>.Unauthorized();
+
+                if (!response.IsSuccessStatusCode)
+                    return HandleError<UserFriendsResponse>(response);
+
+                var data = await response.Content.ReadFromJsonAsync<UserFriendsResponse>();
+
+                return new ApiResult<UserFriendsResponse>
                 {
-                    var data = await response.Content.ReadFromJsonAsync<UserFriendsResponse>();
-                    return new ApiResult<UserFriendsResponse> { Success = true, Data = data };
-                }
-
-                return HandleError<UserFriendsResponse>(response);
+                    Success = true,
+                    Data = data
+                };
             }
             catch
             {
@@ -120,14 +130,20 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.PatchAsync($"/users/{id}/ban", null);
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PatchAsync($"users/{id}/ban", null)
+                );
+
+                if (response == null)
+                    return ApiResult<bool>.Unauthorized();
+
                 return response.IsSuccessStatusCode
-                    ? new ApiResult<bool> { Success = true, Data = true }
+                    ? ApiResult<bool>.SuccessTrue()
                     : HandleError<bool>(response);
             }
             catch
             {
-                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
+                return ApiResult<bool>.ServerError();
             }
         }
 
@@ -135,14 +151,20 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.PatchAsync($"/users/{id}/unban", null);
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PatchAsync($"users/{id}/unban", null)
+                );
+
+                if (response == null)
+                    return ApiResult<bool>.Unauthorized();
+
                 return response.IsSuccessStatusCode
-                    ? new ApiResult<bool> { Success = true, Data = true }
+                    ? ApiResult<bool>.SuccessTrue()
                     : HandleError<bool>(response);
             }
             catch
             {
-                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
+                return ApiResult<bool>.ServerError();
             }
         }
 
@@ -150,14 +172,20 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.PatchAsync($"/users/{id}/make-admin", null);
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PatchAsync($"users/{id}/make-admin", null)
+                );
+
+                if (response == null)
+                    return ApiResult<bool>.Unauthorized();
+
                 return response.IsSuccessStatusCode
-                    ? new ApiResult<bool> { Success = true, Data = true }
+                    ? ApiResult<bool>.SuccessTrue()
                     : HandleError<bool>(response);
             }
             catch
             {
-                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
+                return ApiResult<bool>.ServerError();
             }
         }
 
@@ -165,14 +193,20 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.PatchAsync($"/users/{id}/remove-admin", null);
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PatchAsync($"users/{id}/remove-admin", null)
+                );
+
+                if (response == null)
+                    return ApiResult<bool>.Unauthorized();
+
                 return response.IsSuccessStatusCode
-                    ? new ApiResult<bool> { Success = true, Data = true }
+                    ? ApiResult<bool>.SuccessTrue()
                     : HandleError<bool>(response);
             }
             catch
             {
-                return new ApiResult<bool> { Success = false, Error = AppResources.Error_Server };
+                return ApiResult<bool>.ServerError();
             }
         }
 
@@ -180,13 +214,35 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             var body = new { subject, message };
 
-            var response = await _http.PostAsJsonAsync($"/users/{userId}/warning", body);
+            var response = await AuthService.Instance.SendAuthorizedAsync(
+                http => http.PostAsJsonAsync($"users/{userId}/warning", body)
+            );
 
-            if (!response.IsSuccessStatusCode)
+            if (response == null || !response.IsSuccessStatusCode)
                 return false;
 
             var text = await response.Content.ReadAsStringAsync();
             return text.Contains("success", StringComparison.OrdinalIgnoreCase);
+        }
+        public async Task<ApiResult<bool>> DeleteUserAsync(string id)
+        {
+            try
+            {
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.DeleteAsync($"users/{id}")
+                );
+
+                if (response == null)
+                    return ApiResult<bool>.Unauthorized();
+
+                return response.IsSuccessStatusCode
+                    ? ApiResult<bool>.SuccessTrue()
+                    : HandleError<bool>(response);
+            }
+            catch
+            {
+                return ApiResult<bool>.ServerError();
+            }
         }
     }
 }

@@ -8,7 +8,6 @@ namespace VirtualHerbarium.AdminPanel.Views
         public PlantsView()
         {
             InitializeComponent();
-            DataContext = new PlantsViewModel();
         }
     }
 }

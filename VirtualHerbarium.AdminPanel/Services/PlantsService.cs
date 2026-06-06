@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
+using System.Linq;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
 using VirtualHerbarium.AdminPanel.Models;
+using VirtualHerbarium.AdminPanel.Services.Offline;
+using System.Windows.Media.Imaging;
 
 namespace VirtualHerbarium.AdminPanel.Services
 {
@@ -14,33 +12,31 @@ namespace VirtualHerbarium.AdminPanel.Services
     {
         public static PlantsService Instance { get; } = new PlantsService();
 
-        private readonly HttpClient _http;
+        private PlantsService() { }
 
-        private PlantsService()
-        {
-
-            _http = new HttpClient
-            {
-                BaseAddress = new Uri("https://ezielnik-production.up.railway.app")
-            };
-
-            if (!string.IsNullOrEmpty(AuthService.Instance.Token))
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AuthService.Instance.Token);
-            }
-        }
         public async Task<PlantPhotoResponse?> GetPhotoMetadataAsync(string herbariumId, string plantId, string photoId)
         {
             try
             {
-                var response = await _http.GetAsync(
-                    $"/herbaria/{herbariumId}/plants/{plantId}/photos/{photoId}");
+                if (!InternetService.Instance.IsOnline)
+                {
+                    var photos = await LocalPhotosRepository.GetPhotosAsync(plantId);
+                    return photos.FirstOrDefault(p => p.id == photoId);
+                }
 
-                if (!response.IsSuccessStatusCode)
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync($"herbaria/{herbariumId}/plants/{plantId}/photos/{photoId}")
+                );
+
+                if (response == null || !response.IsSuccessStatusCode)
                     return null;
 
-                return await response.Content.ReadFromJsonAsync<PlantPhotoResponse>();
+                var data = await response.Content.ReadFromJsonAsync<PlantPhotoResponse>();
+
+                if (data != null)
+                    await LocalPhotosRepository.AddPhotoAsync(data);
+
+                return data;
             }
             catch
             {
@@ -48,43 +44,38 @@ namespace VirtualHerbarium.AdminPanel.Services
             }
         }
 
-        public async Task<BitmapImage?> LoadPhotoAsync(string relativeUrl)
+        public async Task<BitmapImage?> LoadPhotoAsync(string photoId, string url)
         {
-            try
-            {
-                var clean = relativeUrl.TrimStart('/');
-                var url = $"{_http.BaseAddress}{clean}";
-
-                var response = await _http.GetAsync(url);
-
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                var bytes = await response.Content.ReadAsByteArrayAsync();
-                if (bytes.Length == 0)
-                    return null;
-
-                using var ms = new MemoryStream(bytes);
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = ms;
-                image.EndInit();
-                image.Freeze();
-
-                return image;
-            }
-            catch
-            {
-                return null;
-            }
+            return await PhotoCacheService.LoadPhotoAsync(photoId, url);
         }
 
         public async Task<ApiResult<List<PlantResponse>>> GetPlantsAsync()
         {
             try
             {
-                var herbariaResponse = await _http.GetAsync("/stats/herbaria");
+                if (!InternetService.Instance.IsOnline)
+                {
+                    var offlinePlants = await LocalPlantsRepository.GetPlantsAsync();
+
+                    return new ApiResult<List<PlantResponse>>
+                    {
+                        Success = true,
+                        Data = offlinePlants
+                    };
+                }
+                var herbariaResponse = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync("stats/herbaria")
+                );
+
+                if (herbariaResponse == null)
+                {
+                    return new ApiResult<List<PlantResponse>>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
 
                 if (!herbariaResponse.IsSuccessStatusCode)
                 {
@@ -97,14 +88,15 @@ namespace VirtualHerbarium.AdminPanel.Services
                 }
 
                 var herbaria = await herbariaResponse.Content.ReadFromJsonAsync<List<HerbariumStatsResponse>>();
-
                 var allPlants = new List<PlantResponse>();
 
                 foreach (var herbarium in herbaria)
                 {
-                    var plantsResponse = await _http.GetAsync($"/herbaria/{herbarium.id}/plants");
+                    var plantsResponse = await AuthService.Instance.SendAuthorizedAsync(
+                        http => http.GetAsync($"herbaria/{herbarium.id}/plants")
+                    );
 
-                    if (!plantsResponse.IsSuccessStatusCode)
+                    if (plantsResponse == null || !plantsResponse.IsSuccessStatusCode)
                         continue;
 
                     var plants = await plantsResponse.Content.ReadFromJsonAsync<List<PlantResponse>>();
@@ -118,6 +110,8 @@ namespace VirtualHerbarium.AdminPanel.Services
                     }
                 }
 
+                await LocalPlantsRepository.SavePlantsAsync(allPlants);
+
                 return new ApiResult<List<PlantResponse>>
                 {
                     Success = true,
@@ -129,8 +123,7 @@ namespace VirtualHerbarium.AdminPanel.Services
                 return new ApiResult<List<PlantResponse>>
                 {
                     Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
+                    Error = ex.Message
                 };
             }
         }
@@ -138,7 +131,40 @@ namespace VirtualHerbarium.AdminPanel.Services
         {
             try
             {
-                var response = await _http.GetAsync($"/herbaria/{herbariumId}/plants/{plantId}");
+                if (!InternetService.Instance.IsOnline)
+                {
+                    var photos = await LocalPhotosRepository.GetPhotosAsync(plantId);
+
+                    var offlineDetails = new PlantDetailsResponse
+                    {
+                        id = plantId,
+                        herbariumId = herbariumId,
+                        name = "(offline)",
+                        createdAt = DateTime.MinValue,
+                        updatedAt = DateTime.MinValue,
+                        photos = photos
+                    };
+
+                    return new ApiResult<PlantDetailsResponse>
+                    {
+                        Success = true,
+                        Data = offlineDetails
+                    };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.GetAsync($"herbaria/{herbariumId}/plants/{plantId}")
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<PlantDetailsResponse>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -151,6 +177,9 @@ namespace VirtualHerbarium.AdminPanel.Services
 
                 var data = await response.Content.ReadFromJsonAsync<PlantDetailsResponse>();
 
+                if (data?.photos != null)
+                    await LocalPhotosRepository.SavePhotosAsync(data.photos);
+
                 return new ApiResult<PlantDetailsResponse>
                 {
                     Success = true,
@@ -162,20 +191,48 @@ namespace VirtualHerbarium.AdminPanel.Services
                 return new ApiResult<PlantDetailsResponse>
                 {
                     Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
+                    Error = ex.Message
                 };
             }
         }
-
         public async Task<ApiResult<bool>> DeletePlantAsync(string herbariumId, string plantId)
         {
             try
             {
-                var response = await _http.DeleteAsync($"/herbaria/{herbariumId}/plants/{plantId}");
+                if (!InternetService.Instance.IsOnline)
+                {
+                    await LocalPlantsRepository.DeletePlantAsync(plantId);
+
+                    LocalDatabaseService.Instance.AddToSyncQueue(
+                        actionType: "delete",
+                        entityType: "plant",
+                        entityId: plantId,
+                        payload: "{}",
+                        baseUpdatedAt: null
+                    );
+
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.DeleteAsync($"herbaria/{herbariumId}/plants/{plantId}")
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<bool>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
 
                 if (response.IsSuccessStatusCode)
+                {
+                    await LocalPlantsRepository.DeletePlantAsync(plantId);
                     return new ApiResult<bool> { Success = true, Data = true };
+                }
 
                 return new ApiResult<bool>
                 {
@@ -189,8 +246,346 @@ namespace VirtualHerbarium.AdminPanel.Services
                 return new ApiResult<bool>
                 {
                     Success = false,
-                    Error = ex.Message,
-                    StatusCode = 0
+                    Error = ex.Message
+                };
+            }
+        }
+        public async Task<ApiResult<bool>> UpdatePlantNameAsync(string herbariumId, string plantId, string newName)
+        {
+            try
+            {
+                var body = new { name = newName };
+
+                if (!InternetService.Instance.IsOnline)
+                {
+                    await LocalPlantsRepository.UpdatePlantAsync(plantId, newName);
+
+                    LocalDatabaseService.Instance.AddToSyncQueue(
+                        actionType: "update",
+                        entityType: "plant",
+                        entityId: plantId,
+                        payload: System.Text.Json.JsonSerializer.Serialize(body),
+                        baseUpdatedAt: null
+                    );
+
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PatchAsJsonAsync($"herbaria/{herbariumId}/plants/{plantId}", body)
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<bool>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await LocalPlantsRepository.UpdatePlantAsync(plantId, newName);
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = await response.Content.ReadAsStringAsync(),
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiResult<PlantDetailsResponse>> AddPlantAsync(
+            string herbariumId,
+            string name,
+            string base64Photo)
+        {
+            try
+            {
+                var body = new
+                {
+                    name,
+                    photo = base64Photo
+                };
+
+                if (!InternetService.Instance.IsOnline)
+                {
+                    var newPlant = new PlantResponse
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        herbariumId = herbariumId,
+                        name = name,
+                        createdAt = DateTime.UtcNow,
+                        updatedAt = DateTime.UtcNow
+                    };
+
+                    await LocalPlantsRepository.AddPlantAsync(newPlant);
+
+                    LocalDatabaseService.Instance.AddToSyncQueue(
+                        actionType: "create",
+                        entityType: "plant",
+                        entityId: newPlant.id,
+                        payload: System.Text.Json.JsonSerializer.Serialize(body),
+                        baseUpdatedAt: null
+                    );
+
+                    return new ApiResult<PlantDetailsResponse>
+                    {
+                        Success = true,
+                        Data = new PlantDetailsResponse
+                        {
+                            id = newPlant.id,
+                            name = newPlant.name,
+                            herbariumId = newPlant.herbariumId,
+                            photos = new List<PlantPhotoResponse>()
+                        }
+                    };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PostAsJsonAsync($"herbaria/{herbariumId}/plants/add", body)
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<PlantDetailsResponse>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadFromJsonAsync<PlantDetailsResponse>();
+
+                    if (data != null)
+                    {
+                        await LocalPlantsRepository.AddPlantAsync(new PlantResponse
+                        {
+                            id = data.id,
+                            herbariumId = herbariumId,
+                            name = data.name,
+                            createdAt = data.createdAt,
+                            updatedAt = data.updatedAt
+                        });
+                    }
+
+                    return new ApiResult<PlantDetailsResponse> { Success = true, Data = data };
+                }
+
+                return new ApiResult<PlantDetailsResponse>
+                {
+                    Success = false,
+                    Error = await response.Content.ReadAsStringAsync(),
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<PlantDetailsResponse>
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+        public async Task<ApiResult<bool>> MovePhotoAsync(
+            string herbariumId,
+            string plantId,
+            string photoId,
+            string targetPlantId)
+        {
+            try
+            {
+                var body = new { targetPlantId };
+
+                if (!InternetService.Instance.IsOnline)
+                {
+                    await LocalPhotosRepository.MovePhotoAsync(photoId, targetPlantId);
+
+                    LocalDatabaseService.Instance.AddToSyncQueue(
+                        actionType: "move",
+                        entityType: "photo",
+                        entityId: photoId,
+                        payload: System.Text.Json.JsonSerializer.Serialize(body),
+                        baseUpdatedAt: null
+                    );
+
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PostAsJsonAsync(
+                        $"herbaria/{herbariumId}/plants/{plantId}/photos/{photoId}/move",
+                        body)
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<bool>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await LocalPhotosRepository.MovePhotoAsync(photoId, targetPlantId);
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = await response.Content.ReadAsStringAsync(),
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+        public async Task<ApiResult<bool>> UpdatePhotoDescriptionAsync(
+            string herbariumId,
+            string plantId,
+            string photoId,
+            string description)
+        {
+            try
+            {
+                var body = new { description };
+
+                if (!InternetService.Instance.IsOnline)
+                {
+                    await LocalPhotosRepository.UpdatePhotoDescriptionAsync(photoId, description);
+
+                    LocalDatabaseService.Instance.AddToSyncQueue(
+                        actionType: "update",
+                        entityType: "photo",
+                        entityId: photoId,
+                        payload: System.Text.Json.JsonSerializer.Serialize(body),
+                        baseUpdatedAt: null
+                    );
+
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.PatchAsJsonAsync(
+                        $"herbaria/{herbariumId}/plants/{plantId}/photos/{photoId}",
+                        body)
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<bool>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await LocalPhotosRepository.UpdatePhotoDescriptionAsync(photoId, description);
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = await response.Content.ReadAsStringAsync(),
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+        public async Task<ApiResult<bool>> DeletePhotoAsync(
+            string herbariumId,
+            string plantId,
+            string photoId)
+        {
+            try
+            {
+                if (!InternetService.Instance.IsOnline)
+                {
+                    await LocalPhotosRepository.DeletePhotoAsync(photoId);
+
+                    LocalDatabaseService.Instance.AddToSyncQueue(
+                        actionType: "delete",
+                        entityType: "photo",
+                        entityId: photoId,
+                        payload: "{}",
+                        baseUpdatedAt: null
+                    );
+
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                var response = await AuthService.Instance.SendAuthorizedAsync(
+                    http => http.DeleteAsync(
+                        $"herbaria/{herbariumId}/plants/{plantId}/photos/{photoId}")
+                );
+
+                if (response == null)
+                {
+                    return new ApiResult<bool>
+                    {
+                        Success = false,
+                        Error = "UNAUTHORIZED",
+                        StatusCode = 401
+                    };
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await LocalPhotosRepository.DeletePhotoAsync(photoId);
+                    return new ApiResult<bool> { Success = true, Data = true };
+                }
+
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = await response.Content.ReadAsStringAsync(),
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<bool>
+                {
+                    Success = false,
+                    Error = ex.Message
                 };
             }
         }

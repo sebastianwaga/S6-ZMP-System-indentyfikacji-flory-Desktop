@@ -20,7 +20,12 @@ namespace VirtualHerbarium.AdminPanel.ViewModels
 
         public async Task LoadAsync()
         {
-            Image = await PlantsService.Instance.LoadPhotoAsync(Metadata.url);
+            Image = await PlantsService.Instance.LoadPhotoAsync(
+            Metadata.id,
+            Metadata.url
+            );
+
         }
+
     }
 }
