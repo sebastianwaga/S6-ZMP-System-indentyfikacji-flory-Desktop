@@ -140,9 +140,11 @@ namespace VirtualHerbarium.AdminPanel.Services
 
                 return response;
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                return new HttpResponseMessage(
+                    System.Net.HttpStatusCode.ServiceUnavailable);
             }
         }
     }

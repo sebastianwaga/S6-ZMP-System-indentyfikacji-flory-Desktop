@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using VirtualHerbarium.AdminPanel.Services;
 using VirtualHerbarium.AdminPanel.ViewModels;
 
 namespace VirtualHerbarium.AdminPanel.Views
@@ -18,10 +19,14 @@ namespace VirtualHerbarium.AdminPanel.Views
                 vm.Password = ((PasswordBox)sender).Password;
         }
 
-        public void OnLoginSuccess()
+        public async void OnLoginSuccess()
         {
             var main = new MainWindow();
             main.Show();
+
+            SyncWorker.Instance.Start();
+
+            await InternetService.Instance.ForceCheck();
 
             Close();
         }

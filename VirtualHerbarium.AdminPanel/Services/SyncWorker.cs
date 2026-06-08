@@ -44,6 +44,11 @@ namespace VirtualHerbarium.AdminPanel.Services
 
         private async Task TickAsync()
         {
+            _http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    "Bearer",
+                    AuthService.Instance.Token);
+
             if (!InternetService.Instance.IsOnline)
                 return;
 
@@ -259,22 +264,29 @@ namespace VirtualHerbarium.AdminPanel.Services
 
         private async Task PullServerChangesAsync()
         {
-            var herbaria = await _http.GetFromJsonAsync<List<HerbariumDetailsResponse>>(
-                "herbaria/me");
-
-            if (herbaria != null)
-                await LocalHerbariaRepository.SaveHerbariaAsync(herbaria);
-
-            foreach (var h in herbaria ?? new List<HerbariumDetailsResponse>())
+            try
             {
-                var plants = await _http.GetFromJsonAsync<List<PlantResponse>>(
-                    $"herbaria/{h.id}/plants");
+                var herbaria = await _http.GetFromJsonAsync<List<HerbariumDetailsResponse>>(
+                    "herbaria/me");
 
-                if (plants != null)
-                    await LocalPlantsRepository.SavePlantsAsync(plants);
+                if (herbaria != null)
+                    await LocalHerbariaRepository.SaveHerbariaAsync(herbaria);
+
+                foreach (var h in herbaria ?? new List<HerbariumDetailsResponse>())
+                {
+                    var plants = await _http.GetFromJsonAsync<List<PlantResponse>>(
+                        $"herbaria/{h.id}/plants");
+
+                    if (plants != null)
+                        await LocalPlantsRepository.SavePlantsAsync(plants);
+                }
+
+                LocalDatabaseService.Instance.UpdateLastSyncTime(DateTime.UtcNow);
             }
+            catch
+            {
 
-            LocalDatabaseService.Instance.UpdateLastSyncTime(DateTime.UtcNow);
+            }
         }
     }
 }
